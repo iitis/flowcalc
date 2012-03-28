@@ -16,6 +16,22 @@ struct flow {
 	int bytes_down;
 };
 
+bool init(struct lfc *lfc)
+{
+	printf("%%%% counters 0.1\n");
+	printf("%% cts_pkts_up:    number of packets in the initial direction\n");
+	printf("%% cts_pkts_down:  number of packets backwards\n");
+	printf("%% cts_bytes_up:   number of bytes in the initial direction\n");
+	printf("%% cts_bytes_down: numbers of bytes backwards\n");
+
+	printf("@attribute cts_pkts_up numeric\n");
+	printf("@attribute cts_pkts_down numeric\n");
+	printf("@attribute cts_bytes_up numeric\n");
+	printf("@attribute cts_bytes_down numeric\n");
+
+	return true;
+}
+
 void pkt(struct lfc *lfc, double ts, bool up, libtrace_packet_t *pkt, void *data)
 {
 	struct flow *t = data;
@@ -41,8 +57,8 @@ void flow(struct lfc *lfc, struct lfc_flow *lf, void *data)
 }
 
 struct module module = {
-	.name = "counters",
 	.size = sizeof(struct flow),
+	.init = init,
 	.pkt  = pkt,
 	.flow = flow
 };

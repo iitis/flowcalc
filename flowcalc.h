@@ -11,10 +11,9 @@
 
 #include <libflowcalc.h>
 
-struct module {
-	/** Module name */
-	const char *name;
+#define FLOWCALC_VER "0.1"
 
+struct module {
 	/** Flow data size (bytes) */
 	int size;
 
@@ -28,6 +27,17 @@ struct module {
 
 	/** Flow-timeout callback */
 	flow_cb flow;
+};
+
+struct flowcalc {
+	mmatic *mm;           /**> memory */
+	struct lfc *lfc;      /**> libflowcalc handle */
+
+	tlist *files;         /**> list of char*: files to process */
+	const char *filter;   /**> optional filter */
+	const char *relation; /**> ARFF @relation */
+	tlist *modules;       /**> list of char*: modules */
+	const char *dir;      /**> module directory */
 };
 
 #endif
