@@ -32,17 +32,23 @@ For `pkt` and `flow`, see `libflowcalc.h` in the [libflowcalc](https://github.co
 project:
 
 	/** A per-packet callback function
+	 * @param pdata  plugin data
+	 * @param lf     flow data
+	 * @param data   plugin flow data
 	 * @param ts     packet timestamp
 	 * @param up     if true, this packet flows in the same direction as the
 	 *               the first packet that created the flow
 	 * @param is_new true for first packet in flow
 	 * @param pkt    libtrace packet - access to packet data
-	 * @param data   flow data
 	 */
-	typedef void (*pkt_cb)(struct lfc *lfc, double ts, bool up, libtrace_packet_t *pkt, void *data);
+	typedef void (*pkt_cb)(struct lfc *lfc, void *pdata,
+		struct lfc_flow *lf, void *data,
+		double ts, bool up, bool is_new, libtrace_packet_t *pkt);
 
 	/** A callback to call when a flow is closed
+	 * @param pdata  plugin data
 	 * @param lf     basic flow information
 	 * @param data   flow data
 	 */
-	typedef void (*flow_cb)(struct lfc *lfc, struct lfc_flow *lf, void *data);
+	typedef void (*flow_cb)(struct lfc *lfc, void *pdata,
+		struct lfc_flow *lf, void *data);
