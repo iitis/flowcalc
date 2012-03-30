@@ -33,7 +33,8 @@ bool init()
 }
 
 void pkt(struct lfc *lfc, void *pdata,
-	double ts, bool up, bool is_new, libtrace_packet_t *pkt, void *data)
+	struct lfc_flow *lf, void *data,
+	double ts, bool up, bool is_new, libtrace_packet_t *pkt)
 {
 	struct flow *t = data;
 	int len;

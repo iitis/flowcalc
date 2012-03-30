@@ -35,6 +35,7 @@ project:
 	 * @param ts     packet timestamp
 	 * @param up     if true, this packet flows in the same direction as the
 	 *               the first packet that created the flow
+	 * @param is_new true for first packet in flow
 	 * @param pkt    libtrace packet - access to packet data
 	 * @param data   flow data
 	 */

@@ -3,3 +3,4 @@
 *.so
 flowcalc
 core
+lpi/libprotoident.h
