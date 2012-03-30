@@ -160,7 +160,7 @@ static void header(struct flowcalc *fc)
 	printf("\n");
 }
 
-static void flow_start(struct lfc *lfc, struct lfc_flow *lf, void *data)
+static void flow_start(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *data)
 {
 	printf("%.6f", lf->ts_first);
 	printf(",%.6f", lf->ts_last - lf->ts_first);
@@ -175,7 +175,7 @@ static void flow_start(struct lfc *lfc, struct lfc_flow *lf, void *data)
 
 }
 
-static void flow_end(struct lfc *lfc, struct lfc_flow *lf, void *data)
+static void flow_end(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *data)
 {
 	printf("\n");
 }
@@ -188,6 +188,7 @@ int main(int argc, char *argv[])
 	struct module *mod;
 	char *name, *s;
 	tlist *ls;
+	void *pdata;
 
 	/*
 	 * initialization
@@ -215,7 +216,7 @@ int main(int argc, char *argv[])
 	}
 
 	fc->lfc = lfc_init();
-	lfc_register(fc->lfc, "flow_start", 0, NULL, flow_start);
+	lfc_register(fc->lfc, "flow_start", 0, NULL, flow_start, NULL);
 
 	/*
 	 * load modules and draw ARFF header
@@ -233,19 +234,22 @@ int main(int argc, char *argv[])
 			die("Opening module '%s' failed: no 'module' variable found inside\n", name);
 
 		if (mod->init) {
-			if (!mod->init(fc->lfc))
+			pdata = NULL;
+			if (!mod->init(fc->lfc, &pdata))
 				die("Opening module '%s' failed: the init() function returned false\n", name);
+			else
+				printf("\n");
 		}
 
-		lfc_register(fc->lfc, name, mod->size, mod->pkt, mod->flow);
+		lfc_register(fc->lfc, name, mod->size, mod->pkt, mod->flow, pdata);
 	}
 
-	lfc_register(fc->lfc, "flow_end", 0, NULL, flow_end);
+	lfc_register(fc->lfc, "flow_end", 0, NULL, flow_end, NULL);
 
 	/*
 	 * run it!
 	 */
-	printf("\n@data\n");
+	printf("@data\n");
 
 	tlist_iter_loop(fc->files, name) {
 		printf("%% %s\n", name);

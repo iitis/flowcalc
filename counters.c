@@ -16,7 +16,7 @@ struct flow {
 	int bytes_down;
 };
 
-bool init(struct lfc *lfc)
+bool init()
 {
 	printf("%%%% counters 0.1\n");
 	printf("%% cts_pkts_up:    number of packets in the initial direction\n");
@@ -32,7 +32,8 @@ bool init(struct lfc *lfc)
 	return true;
 }
 
-void pkt(struct lfc *lfc, double ts, bool up, libtrace_packet_t *pkt, void *data)
+void pkt(struct lfc *lfc, void *pdata,
+	double ts, bool up, bool is_new, libtrace_packet_t *pkt, void *data)
 {
 	struct flow *t = data;
 	int len;
@@ -48,7 +49,8 @@ void pkt(struct lfc *lfc, double ts, bool up, libtrace_packet_t *pkt, void *data
 	}
 }
 
-void flow(struct lfc *lfc, struct lfc_flow *lf, void *data)
+void flow(struct lfc *lfc, void *pdata,
+	struct lfc_flow *lf, void *data)
 {
 	struct flow *t = data;
 

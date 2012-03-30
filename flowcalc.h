@@ -14,19 +14,15 @@
 #define FLOWCALC_VER "0.1"
 
 struct module {
-	/** Flow data size (bytes) */
-	int size;
+	int size;                      /**> Flow data size (bytes) */
+	pkt_cb pkt;                    /**> Per-packet callback */
+	flow_cb flow;                  /**> Flow-timeout callback */
 
-	/** Initialization function
-	 * @retval false  failed
+	/**> Optional initialization function
+	 * @param pdata    space for storing pdata address (optional)
+	 * @retval false   initialization failed
 	 */
-	bool (*init)(struct lfc *lfc);
-
-	/** Per-packet callback */
-	pkt_cb pkt;
-
-	/** Flow-timeout callback */
-	flow_cb flow;
+	bool (*init)(struct lfc *lfc, void **pdata);
 };
 
 struct flowcalc {
