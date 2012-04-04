@@ -21,12 +21,12 @@
 /** Prints usage help screen */
 static void help(void)
 {
-	printf("Usage: flowcalc [OPTIONS] <TRACE FILES...>\n");
+	printf("Usage: flowcalc [OPTIONS] <TRACE FILE>\n");
 	printf("\n");
-	printf("  Calculates IP flows and their features out of IP trace files (eg. PCAP)\n");
+	printf("  Calculates IP flows and their features out of IP trace file (eg. PCAP)\n");
 	printf("\n");
 	printf("Options:\n");
-	printf("  -f \"<filter>\"        apply given packet filter on all input files\n");
+	printf("  -f \"<filter>\"          apply given packet filter on the input file\n");
 	printf("  -r <string>            set ARFF @relation to given string\n");
 	printf("  -d <dir>               directory to look for modules in\n");
 	printf("  -e <modules>           comma-separated list of modules to enable\n");
@@ -99,10 +99,7 @@ static int parse_argv(struct flowcalc *fc, int argc, char *argv[])
 	}
 
 	if (argc - optind > 0) {
-		while (argc - optind > 0) {
-			tlist_push(fc->files, argv[optind]);
-			optind++;
-		}
+		fc->file = mmatic_strdup(fc->mm, argv[optind]);
 	} else {
 		help();
 		return 1;
@@ -115,33 +112,25 @@ static void header(struct flowcalc *fc)
 {
 	time_t now;
 	const char *name;
-	char buf[100];
 
-	printf("%%%% flowcalc\n");
+	time(&now);
+	printf("%%%% flowcalc run at %s", ctime(&now));
 
 	printf("%% modules: ");
 	tlist_iter_loop(fc->modules, name)
 		printf("%s ", name);
 	printf("\n");
 
-	printf("%% files: ");
-	tlist_iter_loop(fc->files, name)
-		printf("%s ", name);
-	printf("\n");
-
 	if (fc->filter)
 		printf("%% filter: %s\n", fc->filter);
 
-	if (fc->relation) {
+	if (fc->relation)
 		printf("\n@relation '%s'\n\n", fc->relation);
-	} else {
-		time(&now);
-		ctime_r(&now, buf);
-		buf[strlen(buf)-1] = 0;
-		printf("\n@relation '%s'\n\n", buf);
-	}
+	else
+		printf("\n@relation '%s'\n\n", fc->file);
 
 	printf("%%%% flowcalc " FLOWCALC_VER "\n");
+	printf("%% fc_id:       flow id\n");
 	printf("%% fc_tstamp:   timestamp of first packet in the flow\n");
 	printf("%% fc_duration: flow duration\n");
 	printf("%% fc_proto:    transport protocol\n");
@@ -162,7 +151,9 @@ static void header(struct flowcalc *fc)
 
 static void flow_start(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *data)
 {
-	printf("%.6f", lf->ts_first);
+	printf("%u", lf->id);
+
+	printf(",%.6f", lf->ts_first);
 	printf(",%.6f", lf->ts_last - lf->ts_first);
 
 	if (lf->proto == IPPROTO_UDP)
@@ -196,7 +187,6 @@ int main(int argc, char *argv[])
 	mm = mmatic_create();
 	fc = mmatic_zalloc(mm, sizeof *fc);
 	fc->mm = mm;
-	fc->files = tlist_create(NULL, mm);
 	fc->modules = tlist_create(NULL, mm);
 
 	/* read options */
@@ -251,15 +241,8 @@ int main(int argc, char *argv[])
 	 */
 	printf("@data\n");
 
-	tlist_iter_loop(fc->files, name) {
-		printf("%% %s\n", name);
-
-		if (!lfc_run(fc->lfc, name, fc->filter))
-			die("Reading file '%s' failed\n", name);
-	;
-
-		fflush(NULL);
-	}
+	if (!lfc_run(fc->lfc, fc->file, fc->filter))
+		die("Reading file '%s' failed\n", fc->file);
 
 	lfc_deinit(fc->lfc);
 	mmatic_destroy(mm);

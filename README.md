@@ -17,8 +17,17 @@ another function in the module is called so that it prints the flow data to the 
 flowcalc uses the ARFF output file format readable e.g. by the WEKA and RapidMiner data-mining
 environments.
 
-How to write a module
----------------------
+flowdump
+========
+
+Another interesting program is flowdump, which for example can be used to rewrite one big PCAP file
+into many smaller ones, one for each layer 7 protocol. This can be used for training
+machine-learning IP traffic classification systems.
+
+Packets can be rewritten basing on the value of any column found in the flowcalc output file.
+
+How to write a flowcalc module
+------------------------------
 
 See `counters.c` for an example of a simple module. Basically, your C file needs to define a global
 `struct module` variable named `module` (see `flowcalc.h`). This structure has a few fields:

@@ -29,7 +29,7 @@ struct flowcalc {
 	mmatic *mm;           /**> memory */
 	struct lfc *lfc;      /**> libflowcalc handle */
 
-	tlist *files;         /**> list of char*: files to process */
+	const char *file;     /**> trace file */
 	const char *filter;   /**> optional filter */
 	const char *relation; /**> ARFF @relation */
 	tlist *modules;       /**> list of char*: modules */
