@@ -34,6 +34,7 @@ struct flowcalc {
 	const char *relation; /**> ARFF @relation */
 	tlist *modules;       /**> list of char*: modules */
 	const char *dir;      /**> module directory */
+	bool any;             /**> enable LFM_CONFIG_TCP_ANYSTART? */
 };
 
 #endif

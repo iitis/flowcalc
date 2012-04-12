@@ -30,6 +30,7 @@ static void help(void)
 	printf("  -r <string>            set ARFF @relation to given string\n");
 	printf("  -d <dir>               directory to look for modules in\n");
 	printf("  -e <modules>           comma-separated list of modules to enable\n");
+	printf("  -a                     start TCP flows with any packet\n");
 	printf("  --verbose,-V           be verbose (alias for --debug=5)\n");
 	printf("  --debug=<num>          set debugging level\n");
 	printf("  --help,-h              show this usage help screen\n");
@@ -56,7 +57,7 @@ static int parse_argv(struct flowcalc *fc, int argc, char *argv[])
 	int i, c;
 	char *d, *s;
 
-	static char *short_opts = "hvVf:r:d:e:";
+	static char *short_opts = "hvVf:r:d:e:a";
 	static struct option long_opts[] = {
 		/* name, has_arg, NULL, short_ch */
 		{ "verbose",    0, NULL,  1  },
@@ -94,6 +95,7 @@ static int parse_argv(struct flowcalc *fc, int argc, char *argv[])
 				}
 				tlist_push(fc->modules, s);
 				break;
+			case 'a': fc->any = true; break;
 			default: help(); return 1;
 		}
 	}
@@ -208,12 +210,18 @@ int main(int argc, char *argv[])
 	fc->lfc = lfc_init();
 	lfc_register(fc->lfc, "flow_start", 0, NULL, flow_start, NULL);
 
+	if (fc->any)
+		lfc_enable(fc->lfc, LFC_OPT_TCP_ANYSTART);
+
 	/*
 	 * load modules and draw ARFF header
 	 */
 	header(fc);
 
 	tlist_iter_loop(fc->modules, name) {
+		if (streq(name, "none"))
+			break;
+
 		h = dlopen(mmatic_sprintf(mm, "%s/%s.so", fc->dir, name),
 			RTLD_LOCAL | RTLD_LAZY);
 		if (!h)
