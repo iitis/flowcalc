@@ -67,7 +67,7 @@ bool init(struct lfc *lfc, void **pdata)
 
 	*pdata = ndpi;
 
-	printf("%%%% ndpi 0.1 - nDPI \n");
+	printf("%%%% ndpi 0.1 - nDPI\n");
 	printf("@attribute ndpi_proto string\n");
 
 	return true;

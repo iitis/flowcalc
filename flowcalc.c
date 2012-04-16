@@ -141,6 +141,7 @@ static void header(struct flowcalc *fc)
 	printf("%% fc_dst_addr: IP address of remote peer\n");
 	printf("%% fc_dst_port: TP port number of remote peer\n");
 
+	printf("@attribute fc_id numeric\n");
 	printf("@attribute fc_tstamp numeric\n");
 	printf("@attribute fc_duration numeric\n");
 	printf("@attribute fc_proto {TCP,UDP}\n");

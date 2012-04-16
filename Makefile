@@ -4,7 +4,7 @@ CFLAGS   += $(FLAGS) -std=gnu99 -Dinline='inline __attribute__ ((gnu_inline))' $
 PREFIX ?= /usr
 PKGDST = $(DESTDIR)$(PREFIX)
 
-TARGETS = flowcalc $(shell ls *.c | sed -re '/^flow(calc|dump).c/d' -e 's;.c;.so;g') flowdump
+TARGETS = flowcalc $(shell ls *.c | sed -re '/^flow(calc|dump).c/d' -e 's;\.c;.so;g') flowdump
 
 default: all
 all: $(TARGETS)
@@ -20,7 +20,7 @@ ndpi.so: ndpi.c
 	$(CC) $(CFLAGS) -lflowcalc -lpjf -lndpi -shared -o ndpi.so ndpi.c
 
 %.so: %.c
-	$(CC) $(CFLAGS) -lflowcalc -lpjf -shared -o $@ $<
+	$(CC) $(CFLAGS) -lflowcalc -lm -lpjf -shared -o $@ $<
 
 ###
 
