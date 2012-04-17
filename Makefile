@@ -25,10 +25,10 @@ ndpi.so: ndpi.c
 ###
 
 flowcalc: flowcalc.c
-	gcc $(CFLAGS) -lflowcalc -lpjf -ldl flowcalc.c -o flowcalc
+	gcc $(CFLAGS) flowcalc.c -o flowcalc -lflowcalc -lpjf -ldl 
 
 flowdump: flowdump.c
-	gcc $(CFLAGS) -lflowcalc -lpjf flowdump.c -o flowdump
+	gcc $(CFLAGS) flowdump.c -o flowdump -lflowcalc -lpjf 
 
 ###
 
