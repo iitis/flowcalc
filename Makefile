@@ -14,13 +14,13 @@ lpi/libprotoident.h:
 	./lpi/gen-libprotoident-h.sh
 
 lpi.so: lpi/libprotoident.h lpi.c
-	$(CC) $(CFLAGS) -lflowcalc -lpjf -lprotoident -shared -o lpi.so lpi.c
+	$(CC) $(CFLAGS) -shared -o lpi.so lpi.c -lprotoident 
 
 ndpi.so: ndpi.c
-	$(CC) $(CFLAGS) -lflowcalc -lpjf -lndpi -shared -o ndpi.so ndpi.c
+	$(CC) $(CFLAGS) -shared -o ndpi.so ndpi.c -lndpi
 
 %.so: %.c
-	$(CC) $(CFLAGS) -lflowcalc -lm -lpjf -shared -o $@ $<
+	$(CC) $(CFLAGS) -shared -o $@ $< -lflowcalc -lm -lpjf 
 
 ###
 
