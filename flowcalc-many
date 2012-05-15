@@ -1,0 +1,51 @@
+#!/bin/bash
+
+args=()
+files=()
+labels=()
+
+for arg in "$@"; do
+	if [[ -f "$arg" ]]; then
+		files[${#files[@]}]="$arg"
+
+		label="${arg##*/}"
+		label="${label%.*}"
+		labels[${#labels[@]}]="$label"
+	else
+		args[${#args[@]}]="$arg"
+	fi
+done
+
+for i in ${!files[@]}; do
+	flowcalc ${args[@]} -- "${files[$i]}" \
+	| while read line; do
+		case "${line:0:1}" in
+			""|"@"|"%")
+				echo "$line"
+				continue
+				;;
+			*)
+				echo "$line,${labels[$i]}"
+				;;
+		esac
+	done
+done | while read line; do
+	if [[ "$done" = "1" ]]; then
+		case "${line:0:1}" in
+			""|"@"|"%")
+				continue
+				;;
+			*)
+				echo "$line"
+				;;
+		esac
+	else
+		if [[ "$line" = "@data" ]]; then
+			( IFS=","; echo "@attribute label {${labels[*]}}"; )
+			echo "@data"
+			done=1
+		else
+			echo "$line"
+		fi
+	fi
+done
