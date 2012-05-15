@@ -4,7 +4,7 @@
  * Copyright (C) 2012 IITiS PAN Gliwice <http://www.iitis.pl/>
  */
 
-#include <libopendpi/ipq_api.h>
+#include <libopendpi-1.3/libopendpi/ipq_api.h>
 #include "flowcalc.h"
 
 static char *p2s[] = { IPOQUE_PROTOCOL_SHORT_STRING };
