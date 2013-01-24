@@ -26,6 +26,7 @@ static void help(void)
 	printf("  -f \"<filter>\"          apply given packet filter on the input trace file\n");
 	printf("  -d <dir>               output directory\n");
 	printf("  -c <num>               use column <num> as the output file name\n");
+	printf("  -s <value>             select rows with given column <value> only\n");
 	printf("  --verbose,-V           be verbose (alias for --debug=5)\n");
 	printf("  --debug=<num>          set debugging level\n");
 	printf("  --help,-h              show this usage help screen\n");
@@ -51,7 +52,7 @@ static int parse_argv(struct flowdump *fd, int argc, char *argv[])
 {
 	int i, c;
 
-	static char *short_opts = "hvVf:d:c:";
+	static char *short_opts = "hvVf:d:c:s:";
 	static struct option long_opts[] = {
 		/* name, has_arg, NULL, short_ch */
 		{ "verbose",    0, NULL,  1  },
@@ -80,6 +81,7 @@ static int parse_argv(struct flowdump *fd, int argc, char *argv[])
 			case 'f': fd->filter = mmatic_strdup(fd->mm, optarg); break;
 			case 'd': fd->dir = mmatic_strdup(fd->mm, optarg); break;
 			case 'c': fd->colnum = atoi(optarg); break;
+			case 's': fd->value = mmatic_strdup(fd->mm, optarg); break;
 			default: help(); return 1;
 		}
 	}
@@ -174,6 +176,12 @@ static void pkt(struct lfc *lfc, void *pdata,
 				f->ignore = true;
 				return;
 			}
+		}
+
+		/* ignore flows with column values we are not interested in */
+		if (fd->value && !streq(fd->value, name)) {
+			f->ignore = true;
+			return;
 		}
 
 		/* get libtrace output file */

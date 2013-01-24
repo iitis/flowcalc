@@ -25,6 +25,7 @@ struct flowdump {
 	const char *arff_file;  /**> ARFF file */
 	FILE *afh;              /**> arff_file fopen() */
 	uint16_t colnum;        /**> column number */
+	const char *value;      /**> value to search for */
 	thash *cache;           /**> cache: flow id -> name */
 
 	const char *pcap_file;  /**> trace file */
