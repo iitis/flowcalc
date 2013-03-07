@@ -16,7 +16,7 @@ struct flow {
 	int bytes_down;
 };
 
-bool init()
+bool init(struct lfc *lfc, void **pdata)
 {
 	printf("%%%% counters 0.1\n");
 	printf("%% cts_pkts_up:    number of packets in the initial direction\n");

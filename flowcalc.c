@@ -223,8 +223,7 @@ int main(int argc, char *argv[])
 		if (streq(name, "none"))
 			break;
 
-		h = dlopen(mmatic_sprintf(mm, "%s/%s.so", fc->dir, name),
-			RTLD_LOCAL | RTLD_LAZY);
+		h = dlopen(mmatic_sprintf(mm, "%s/%s.so", fc->dir, name), RTLD_LOCAL | RTLD_LAZY);
 		if (!h)
 			die("Opening module '%s' failed: %s\n", name, dlerror());
 
