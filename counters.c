@@ -9,11 +9,11 @@
 #include "flowcalc.h"
 
 struct flow {
-	int pkts_up;
-	int pkts_down;
+	uint64_t pkts_up;
+	uint64_t pkts_down;
 
-	int bytes_up;
-	int bytes_down;
+	uint64_t bytes_up;
+	uint64_t bytes_down;
 };
 
 bool init(struct lfc *lfc, void **pdata)
@@ -55,8 +55,8 @@ void flow(struct lfc *lfc, void *pdata,
 {
 	struct flow *t = data;
 
-	printf(",%d,%d", t->pkts_up, t->pkts_down);
-	printf(",%d,%d", t->bytes_up, t->bytes_down);
+	printf(",%llu,%llu", t->pkts_up, t->pkts_down);
+	printf(",%llu,%llu", t->bytes_up, t->bytes_down);
 }
 
 struct module module = {
