@@ -25,7 +25,7 @@ ndpi.so: ndpi.c
 ###
 
 flowcalc: flowcalc.c
-	gcc $(CFLAGS) flowcalc.c -o flowcalc -lflowcalc -lpjf -ldl 
+	gcc $(CFLAGS) flowcalc.c -o flowcalc -lflowcalc -lpjf -ldl -DMYDIR=\"$(CURDIR)\"
 
 flowdump: flowdump.c
 	gcc $(CFLAGS) flowdump.c -o flowdump -lflowcalc -lpjf 

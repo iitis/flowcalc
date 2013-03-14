@@ -1,6 +1,6 @@
 /*
  * flowcalc
- * Copyright (c) 2012 IITiS PAN Gliwice <http://www.iitis.pl/>
+ * Copyright (c) 2012-2013 IITiS PAN Gliwice <http://www.iitis.pl/>
  * Author: Paweł Foremski
  *
  * Licensed under GNU GPL v. 3
@@ -42,7 +42,7 @@ static void version(void)
 {
 	printf("flowcalc %s\n", FLOWCALC_VER);
 	printf("Author: Paweł Foremski <pjf@iitis.pl>\n");
-	printf("Copyright (C) 2012 IITiS PAN\n");
+	printf("Copyright (C) 2012-2013 IITiS PAN\n");
 	printf("Licensed under GNU GPL v3\n");
 	printf("Part of the MuTriCs project: <http://mutrics.iitis.pl/>\n");
 	printf("Realized under grant nr 2011/01/N/ST6/07202 of the Polish National Science Centre\n");
@@ -69,7 +69,7 @@ static int parse_argv(struct flowcalc *fc, int argc, char *argv[])
 
 	/* defaults */
 	debug = 0;
-	fc->dir = ".";
+	fc->dir = MYDIR;
 
 	for (;;) {
 		c = getopt_long(argc, argv, short_opts, long_opts, &i);
