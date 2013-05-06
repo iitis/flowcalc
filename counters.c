@@ -6,6 +6,9 @@
  * Licensed under GNU GPL v. 3
  */
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "flowcalc.h"
 
 struct flow {
@@ -55,8 +58,8 @@ void flow(struct lfc *lfc, void *pdata,
 {
 	struct flow *t = data;
 
-	printf(",%llu,%llu", t->pkts_up, t->pkts_down);
-	printf(",%llu,%llu", t->bytes_up, t->bytes_down);
+	printf(",%"PRIu64",%"PRIu64, t->pkts_up, t->pkts_down);
+	printf(",%"PRIu64",%"PRIu64, t->bytes_up, t->bytes_down);
 }
 
 struct module module = {

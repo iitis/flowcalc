@@ -4,7 +4,7 @@ CFLAGS   += $(FLAGS) -std=gnu99 -Dinline='inline __attribute__ ((gnu_inline))' $
 PREFIX ?= /usr
 PKGDST = $(DESTDIR)$(PREFIX)
 
-TARGETS = flowcalc $(shell ls *.c | sed -re '/^flow(calc|dump).c/d' -e 's;\.c;.so;g') flowdump
+TARGETS = flowcalc $(shell ls *.c | sed -re '/^flow(calc|dump).c/d' -e 's;\.c;.so;g' -e '/ndpi/d') flowdump
 
 default: all
 all: $(TARGETS)
@@ -28,7 +28,7 @@ flowcalc: flowcalc.c
 	gcc $(CFLAGS) flowcalc.c -o flowcalc -lflowcalc -lpjf -ldl -DMYDIR=\"$(CURDIR)\"
 
 flowdump: flowdump.c
-	gcc $(CFLAGS) flowdump.c -o flowdump -lflowcalc -lpjf 
+	gcc $(CFLAGS) flowdump.c -o flowdump -lflowcalc -lpjf -ltrace
 
 ###
 
