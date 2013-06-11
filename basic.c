@@ -93,7 +93,7 @@ void pkt(struct lfc *lfc, void *pdata,
 	is->pkts++;
 
 	/* pkt length statistics */
-	pktlen = trace_get_payload_length(pkt);
+	pktlen = trace_get_wire_length(pkt);
 	if (pktlen < is->pktlen_min)
 		is->pktlen_min = pktlen;
 	if (pktlen > is->pktlen_max)
@@ -105,7 +105,7 @@ void pkt(struct lfc *lfc, void *pdata,
 	is->pktlen_mean = mean;
 
 	/* pkt inter-arrival time */
-	if (!is_new) {
+	if (is->last_ts > 0) {
 		iatd = ts - is->last_ts;
 		if (iatd < 0) {
 			iat = 0;
@@ -157,7 +157,7 @@ void flow(struct lfc *lfc, void *pdata,
 	/* print inter-arrival time statistics */
 	is = &flow->up;
 	for (i = 0; i < 2; i++) {
-		if (is->pkts == 0) {
+		if (is->pkts < 2) {
 			printf(",0,0,0,0");
 		} else {
 			printf(",%u,%.0f,%u,%.0f",

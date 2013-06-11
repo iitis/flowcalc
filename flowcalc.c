@@ -28,7 +28,7 @@ static void help(void)
 	printf("Options:\n");
 	printf("  -f \"<filter>\"          apply given packet filter on the input file\n");
 	printf("  -r <string>            set ARFF @relation to given string\n");
-	printf("  -d <dir>               directory to look for modules in\n");
+	printf("  -d <dir>               directory to look for modules in [%s]\n", MYDIR);
 	printf("  -e <modules>           comma-separated list of modules to enable\n");
 	printf("  -a                     start TCP flows with any packet\n");
 	printf("  --verbose,-V           be verbose (alias for --debug=5)\n");
@@ -233,7 +233,7 @@ int main(int argc, char *argv[])
 
 		if (mod->init) {
 			pdata = NULL;
-			if (!mod->init(fc->lfc, &pdata))
+			if (!mod->init(fc->lfc, &pdata, fc))
 				die("Opening module '%s' failed: the init() function returned false\n", name);
 			else
 				printf("\n");

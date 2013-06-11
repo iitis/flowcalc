@@ -1,0 +1,331 @@
+   CoralReef Application Data Files
+
+     The CoralReef Software Suite includes a number of applications that
+     require external data in order to perform such tasks as mapping TCP and
+     UDP port numbers to applications or finding the name of a country given
+     its ISO or FIPS country code. While all of these applications give the
+     user the option of using their own data file, complete data files are
+     also provided so that users who are satisfied with the default files can
+     use these CoralReef applications without any additional hassle. Between
+     CoralReef releases the data contained in these files may change, so we
+     strongly suggest that users verify that the data files are up-to-date
+     before using them.
+
+     ----------------------------------------------------------------------
+
+   Table of Contents
+
+   The CoralReef data file documentation is organized by the application that
+   uses the documented data file.
+
+     * AppPorts.pm
+          * Application_ports_Master.txt
+          * Obsolete_application_ports.txt
+     * Countries.pm
+          * continents.txt
+          * fips.txt
+          * iso3166_2letter.txt
+          * iso3166_3letter.txt
+          * iso3166_loc.txt
+
+     ----------------------------------------------------------------------
+
+   Documentation
+     * AppPorts.pm
+          * Application_ports_Master.txt
+
+            The Application_ports_Master.txt file contains all of the rules
+            that the AppPorts.pm module needs to map a TCP or UDP port or an
+            ICMP type and code to a network application. The file consists of
+            lists of records from which AppPorts.pm can select a match. For a
+            complete list of the applications matched in our default file,
+            please refer to the application groups documentation. Each
+            application record contains the following fields:
+
+                 description (required)
+                         the full name of the application
+
+                 name (required)
+                         a unique name to identify the application; must be
+                         able to be used as a UNIX filename.
+
+                 group (optional)
+
+                         a category for organizing applications, possibly in
+                         directory structures, or for aggregating simular
+                         applications. must be able to be used as a UNIX
+                         filename. defaults to an empty string.
+
+                         Note: The group names used in
+                         Application_ports_Master.txt have changed for
+                         CoralReef 3.6 and future versions. The new groups
+                         are documented in application_ports_groups.html. If
+                         you wish to continue to use the old groups, please
+                         refer to Obsolete_application_ports.txt, below.
+
+                 srcnet (optional)
+                         source IP subnet(s) required for this application to
+                         be a valid match. written in the form x.x.x.x/x;
+                         multiple subnets can be separated by commas.
+                         defaults to matching all subnets. the default can
+                         also be explicitly defined as 0.0.0.0/0.
+
+                 dstnet (optional)
+                         destination IP subnet(s) required for this
+                         application to be a valid match. written in the form
+                         x.x.x.x/x; multiple subnets can be separated by
+                         commas. defaults to matching all subnets. the
+                         default can also be explicitly defined as 0.0.0.0/0.
+
+                 ports_ok (optional)
+                         flag of value 0 or 1 that indicates whether the data
+                         has valid ports or not. matches exactly; for
+                         instance, if ports_ok == 0 and the data's ports are
+                         valid, the rule will not match. defaults to 1
+                         (true).
+
+                 sport (required if ports_ok == 1)
+                         the source TCP/UDP port, or ICMP type, to match.
+                         defined as a list of ports or port ranges, separated
+                         by commas. the special character * indicates all
+                         ports, and a port range is specified with a hyphen.
+                         for example:
+                            * sport: 123, 200-300, 4567
+                            * sport: *
+
+                 dport (required if ports_ok == 1)
+                         the destination TCP/UDP port, or ICMP code, to
+                         match. defined as a list of ports or port ranges,
+                         separated by commas. the special character *
+                         indicates all ports, and a port range is specified
+                         with a hyphen. for example:
+                            * dport: 123, 200-300, 4567
+                            * dport: *
+
+                 sym (optional)
+                         flag of value 0 or 1 that indicates whether the
+                         source and destination ports and subnets are
+                         symmetrical. defaults to 0 (false).
+
+                 protocol (required)
+                         the IP protocol number(s) to match. multiple
+                         protocols should be separated by commas. no ranges
+                         are currently supported, but * can be used to
+                         indicate all protocols.
+
+                 priority (optional)
+                         used for resolving two or more matching rules. 1 is
+                         the highest priority; defaults to 50. if two or more
+                         matching rules with equal priority exist, only one
+                         will be returned. which one of the matching rules is
+                         returned is undefined.
+
+                 contributor (optional)
+                         name of the individual who added this rule to the
+                         file. important for tracking changes in analyses
+                         that depend on port:application mapping. defaults to
+                         an empty string.
+
+                 date (optional)
+                         the date when this rule was last updated. defaults
+                         to an empty string.
+
+                 notes (optional)
+                         any extra information about the rule. defaults to an
+                         empty string.
+
+                 reference (optional)
+                         source of information for the rule. very important
+                         for assessing the validity of port:application
+                         mappings. defaults to an empty string.
+
+                 url (optional)
+                         URL with the most definitive source information for
+                         the rule. defaults to an empty string.
+
+            An example entry for the World Wide Web would be:
+
+         description:    World Wide Web
+         name:           WWW
+         group:          WWW
+         srcnet:         0.0.0.0/0
+         dstnet:         0.0.0.0/0
+         ports_ok:       1
+         sport:          80,8080
+         dport:          *
+         sym:            1
+         protocol:       6
+         priority:       50
+         contributor:    bigj
+         date:           1999-07-08
+         notes:
+         reference:      IANA Port assignments
+         url:            http://www.iana.org/assignments/port-numbers
+
+            Note that srcnet and dstnet can (and should) be omitted, since
+            they default to matching all subnets. The notes and priority are
+            similarly the same as the default.
+
+            If one wanted to override this rule with a domain specific
+            application, such a rule might look like:
+
+         description:    Our non-web app
+         name:           APPFOO
+         group:          INTERNAL
+         srcnet:         10.0.0.0/8
+         sport:          8080
+         dport:          *
+         sym:            1
+         protocol:       6
+         priority:       10
+
+
+            It is possible to create a rule to match all cases, as a
+            fall-through. However, it must have a low priority if it is to be
+            useful:
+
+         description:    Unknown TCP
+         name:           UNKNOWN_TCP
+         sport:          *
+         dport:          *
+         protocol:       6
+         priority:       90
+
+         description:    Unknown
+         name:           UNKNOWN
+         sport:          *
+         dport:          *
+         protocol:       *
+         priority:       100
+
+            The comment character for this file is #.
+
+            Note: The group names used in Application_ports_Master.txt have
+            changed for CoralReef 3.6 and future versions. The new groups are
+            documented in application_ports_groups.html. If you wish to
+            continue to use the old groups, please refer to
+            Obsolete_application_ports.txt, below.
+
+            See also: AppPorts.html
+          * Obsolete_application_ports.txt
+
+            Obsolete_application_ports.txt is the old version of
+            Application_ports_Master.txt released with versions of CoralReef
+            prior to version 3.6. The formatting of
+            Obsolete_application_ports.txt is identical to that of
+            Application_ports_Master.txt; the only difference between the two
+            files is that the group definitions changed for CoralReef version
+            3.6. The new groups are described in
+            application_ports_groups.html.
+
+            Obsolete_application_ports.txt is included in the CoralReef for
+            anyone who wishes to preserve the old group mappings.
+
+     * Countries.pm
+
+       Countries is a module that lets you look up information on countries,
+       continents, and country locations. It is meant to provide general,
+       relatively static information. It does not map latitude and longitude
+       to a specific country, but it does map a country name to the latitude
+       and longitude of its geographic center.
+
+       The comment character for all files read by Countries.pm is #.
+
+          * continents.txt
+
+            File mapping continent codes to continent names. The file entries
+            should be formatted as: "continent-codecontinent-name\n"
+
+            For example:
+
+ sa      South America
+ eu      Europe
+
+          * fips.txt
+
+            File mapping ISO 2-letter country codes to FIPS country codes.
+            The file entries should be formatted as:
+            "ISO-2-letter-codefips-code\n"
+
+            For example:
+
+ ad      an
+ ae      tc
+ af      af
+ ag      ac
+ ai      av
+ al      al
+ am      am
+ an      nt
+ ao      ao
+ as      aq
+
+          * iso3166_2letter.txt
+
+            File mapping ISO 2-letter country codes to the full name of the
+            country. A name in parentheses indicates an alternate name for
+            that country. A name in square brackets indicates an optional
+            addition (usually a prefix) to the existing name. The file
+            entries should be formatted as:
+            "ISO-2-letter-codecountry-full-name\n"
+
+            For example:
+
+ uy      Uruguay
+ uz      Uzbekistan
+ va      Holy See (Vatican City State)
+ vc      Saint Vincent & Grenadines
+ ve      Venezuela
+ vg      British Virgin Islands
+ vi      Virgin Islands [US]
+ vn      Vietnam
+ vu      Vanuatu
+
+          * iso3166_3letter.txt
+
+            File mapping ISO 2-letter country codes to the ISO 3-letter
+            country codes. The file entries should be formatted as:
+            "ISO-2-letter-codeISO-3-letter-code\n"
+
+            For example:
+
+ ad      and
+ ae      are
+ af      afg
+ ag      atg
+ ai      aia
+ al      alb
+ am      arm
+ an      ant
+ ao      ago
+ ar      arg
+ as      asm
+
+          * iso3166_loc.txt
+
+            File mapping ISO 2-letter country codes to the continent
+            containing that country and the latitude and longitude of the
+            center of the country. The file entries should be formatted as:
+            "ISO-2-letter-codecontinent-codelatitude,longitude\n"
+
+            For example:
+
+ ad      eu      42.50,1.50
+ ae      as      24.00,54.00
+ af      as      33.00,65.00
+ ag      na      17.05,-61.80
+ ai      na      18.22,-63.05
+ al      eu      41.00,20.00
+ am      as      40.00,45.00
+ an      na      12.17,-69.00
+ ao      af      -12.50,18.50
+ aq      aq      -77.85,166.67
+ ar      sa      -34.00,-64.00
+ as      oc      -14.32,-170.50
+
+       See also: Countries.html
+
+     ----------------------------------------------------------------------
+
+   Author
+   CoralReef Development team, CAIDA: coral-info@caida.org

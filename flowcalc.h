@@ -13,17 +13,9 @@
 
 #define FLOWCALC_VER "0.1"
 
-struct module {
-	int size;                      /**> Flow data size (bytes) */
-	pkt_cb pkt;                    /**> Per-packet callback */
-	flow_cb flow;                  /**> Flow-timeout callback */
-
-	/**> Optional initialization function
-	 * @param pdata    space for storing pdata address (optional)
-	 * @retval false   initialization failed
-	 */
-	bool (*init)(struct lfc *lfc, void **pdata);
-};
+#ifndef MYDIR
+#define MYDIR "."
+#endif
 
 struct flowcalc {
 	mmatic *mm;           /**> memory */
@@ -35,6 +27,20 @@ struct flowcalc {
 	tlist *modules;       /**> list of char*: modules */
 	const char *dir;      /**> module directory */
 	bool any;             /**> enable LFM_CONFIG_TCP_ANYSTART? */
+};
+
+struct module {
+	int size;                      /**> Flow data size (bytes) */
+	pkt_cb pkt;                    /**> Per-packet callback */
+	flow_cb flow;                  /**> Flow-timeout callback */
+
+	/**> Optional initialization function
+	 * @param lfc      access to libflowcalc configuration, etc.
+	 * @param pdata    space for storing plugin data address (optional)
+	 * @param fc       access to flowcalc configuration, etc.
+	 * @retval false   initialization failed
+	 */
+	bool (*init)(struct lfc *lfc, void **pdata, struct flowcalc *fc);
 };
 
 #endif

@@ -179,7 +179,7 @@ void flow_assign_name(struct dnsdata *md, struct lfc_flow *flow, struct flowdata
 
 /**************************** main code */
 
-bool init(struct lfc *lfc, void **mydata)
+bool init(struct lfc *lfc, void **mydata, struct flowcalc *fc)
 {
 	struct dnsdata *md;
 
@@ -330,7 +330,7 @@ void flow(struct lfc *lfc, void *mydata,
 	if (fd->name[0])
 		printf(",%s", fd->name);
 	else
-		printf(",NO_DNS");
+		printf(",?dns_name");
 }
 
 struct module module = {

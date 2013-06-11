@@ -1,6 +1,6 @@
 /*
  * flowdump
- * Copyright (c) 2012 IITiS PAN Gliwice <http://www.iitis.pl/>
+ * Copyright (c) 2012-2013 IITiS PAN Gliwice <http://www.iitis.pl/>
  * Author: Paweł Foremski
  *
  * Licensed under GNU GPL v. 3
@@ -9,11 +9,23 @@
 #include <getopt.h>
 #include <ctype.h>
 #include <string.h>
+#include <signal.h>
+#include <stdlib.h>
 
 #include <libpjf/main.h>
 #include <libflowcalc.h>
 
 #include "flowdump.h"
+
+struct flowdump *fd;
+
+static void cleanup()
+{
+	lfc_deinit(fd->lfc);
+	thash_free(fd->out_files);
+	mmatic_destroy(fd->mm);
+	exit(0);
+}
 
 /** Prints usage help screen */
 static void help(void)
@@ -24,8 +36,8 @@ static void help(void)
 	printf("\n");
 	printf("Options:\n");
 	printf("  -f \"<filter>\"          apply given packet filter on the input trace file\n");
-	printf("  -d <dir>               output directory\n");
-	printf("  -c <num>               use column <num> as the output file name\n");
+	printf("  -d <dir>               output directory [./flowdump]\n");
+	printf("  -c <num>               use column <num> as the output file name [1]\n");
 	printf("  -s <value>             select rows with given column <value> only\n");
 	printf("  --verbose,-V           be verbose (alias for --debug=5)\n");
 	printf("  --debug=<num>          set debugging level\n");
@@ -38,7 +50,7 @@ static void version(void)
 {
 	printf("flowdump %s\n", FLOWDUMP_VER);
 	printf("Author: Paweł Foremski <pjf@iitis.pl>\n");
-	printf("Copyright (C) 2012 IITiS PAN\n");
+	printf("Copyright (C) 2012-2013 IITiS PAN\n");
 	printf("Licensed under GNU GPL v3\n");
 	printf("Part of the MuTriCs project: <http://mutrics.iitis.pl/>\n");
 	printf("Realized under grant nr 2011/01/N/ST6/07202 of the Polish National Science Centre\n");
@@ -48,7 +60,7 @@ static void version(void)
  * @retval 0     ok
  * @retval 1     error, main() should exit (eg. wrong arg. given)
  * @retval 2     ok, but main() should exit (eg. on --version or --help) */
-static int parse_argv(struct flowdump *fd, int argc, char *argv[])
+static int parse_argv(int argc, char *argv[])
 {
 	int i, c;
 
@@ -64,7 +76,8 @@ static int parse_argv(struct flowdump *fd, int argc, char *argv[])
 
 	/* defaults */
 	debug = 0;
-	fd->dir = ".";
+	fd->dir = "./flowdump";
+	fd->colnum = 1;
 
 	for (;;) {
 		c = getopt_long(argc, argv, short_opts, long_opts, &i);
@@ -99,7 +112,7 @@ static int parse_argv(struct flowdump *fd, int argc, char *argv[])
 
 /*******************************/
 
-static void cache_update(struct flowdump *fd)
+static void cache_update()
 {
 	char buf[BUFSIZ], *ptr, *cm;
 	int i;
@@ -158,7 +171,6 @@ static void pkt(struct lfc *lfc, void *pdata,
 	struct lfc_flow *lf, void *data,
 	double ts, bool up, bool is_new, libtrace_packet_t *pkt)
 {
-	struct flowdump *fd = pdata;
 	struct flow *f = data;
 	char *name, *uri;
 	libtrace_out_t *out;
@@ -167,13 +179,14 @@ static void pkt(struct lfc *lfc, void *pdata,
 		return;
 
 	if (is_new) {
-		/* get output file name */
+		/* find the flow by its id in the ARFF file, get output file name */
 		name = thash_uint_get(fd->cache, lf->id);
 		if (!name) {
-			cache_update(fd);
+			cache_update();
 			name = thash_uint_get(fd->cache, lf->id);
 			if (!name) {
 				f->ignore = true;
+				thash_uint_set(fd->cache, lf->id, NULL);
 				return;
 			}
 		}
@@ -181,6 +194,7 @@ static void pkt(struct lfc *lfc, void *pdata,
 		/* ignore flows with column values we are not interested in */
 		if (fd->value && !streq(fd->value, name)) {
 			f->ignore = true;
+			thash_uint_set(fd->cache, lf->id, NULL);
 			return;
 		}
 
@@ -224,7 +238,6 @@ static void pkt(struct lfc *lfc, void *pdata,
 int main(int argc, char *argv[])
 {
 	mmatic *mm;
-	struct flowdump *fd;
 
 	/*
 	 * initialization
@@ -235,8 +248,11 @@ int main(int argc, char *argv[])
 	fd->cache = thash_create_intkey(mmatic_free, mm);
 	fd->out_files = thash_create_strkey(trace_destroy_output, mm);
 
+	/* catch SIGINT */
+	signal(SIGINT, cleanup);
+
 	/* read options */
-	if (parse_argv(fd, argc, argv))
+	if (parse_argv(argc, argv))
 		return 1;
 
 	/* file-system init */
@@ -259,9 +275,6 @@ int main(int argc, char *argv[])
 	if (!lfc_run(fd->lfc, fd->pcap_file, fd->filter))
 		die("Reading file '%s' failed\n", fd->pcap_file);
 
-	lfc_deinit(fd->lfc);
-	thash_free(fd->out_files);
-	mmatic_destroy(mm);
-
+	cleanup();
 	return 0;
 }

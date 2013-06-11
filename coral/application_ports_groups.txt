@@ -1,0 +1,411 @@
+   CoralReef Application Groups
+
+     The CoralReef Software Suite provides default application groups for use
+     by those who seek to classify various types of monitored traffic in
+     broader classes than individual applications. CoralReef version 3.6 is
+     the first to use these groups in the Application_ports_Master.txt file
+     for use with the AppPorts.pm Perl module.
+
+     This file describes a hierarchical application classification scheme
+     developed at CAIDA. Only the top level of classification is currently
+     available in the Application_ports_Master.txt file. The ability to
+     access the complete classification hierarchy through the AppPorts.pm
+     Perl module is planned for a future release of CoralReef.
+
+     To create our application list, we began with the IANA assigned port
+     numbers and then sought to identify applications generating unexpected
+     volumes of traffic on a particular port. It is by no means a definitive
+     list detailing all applications used on all ports on the Internet. The
+     prevalence of applications that run on any port introduces error into
+     any port-based identification system, so the matches suggested should be
+     validated using other traffic dynamics or packet payloads of accuracy of
+     the application:port mappings is important.
+
+     For tracking overall trends in Internet usage (for research, future
+     planning, network provisioning, new service development, etc.) it can be
+     useful to look beyond the individual applications (which can quickly be
+     adopted by large groups of users and then abandoned as soon as something
+     better comes along) and instead focus on the general activity a given
+     application represents. This document describes the categories we have
+     developed and lists the applications currently identified via our
+     Application_ports_Master.txt file.
+
+     We welcome additions to our list of applications. Please email
+     Application_ports_Master.txt record contributions to
+     coral-info@caida.org.
+
+     ----------------------------------------------------------------------
+
+   Table of Contents
+     * Conferencing
+          * Audio
+          * Text
+          * Video
+          * Other
+     * Encryption
+     * File_Systems
+     * File_Transfer
+          * FTP
+     * Games
+     * Login
+          * Text
+          * GUI
+     * Mail/News
+          * Mail
+          * News
+     * Network_Infrastructure
+          * ICMP
+          * Other
+          * Routing
+     * P2P
+          * Napster
+     * Streaming
+     * Tunneling
+     * WWW
+     * Other
+          * Database
+          * Directory
+          * Host Support
+          * Malicious Code
+          * Packet Radio
+
+     ----------------------------------------------------------------------
+
+   Documentation
+
+   Application classification categories:
+
+     * Conferencing
+
+         applications that can be used for text, voice, and/or video
+         interaction.
+
+          * Audio
+               * phone
+                    * dialpad_control
+                    * dialpad_data
+                    * net2phone
+                    * pgpfone
+                    * skype
+                    * vocaltec
+               * roger_wilco
+          * Text
+               * irc
+               * italk
+               * talk
+               * the_palace
+               * xmpp_jabber
+          * Video
+               * cuseeme
+               * digichat
+               * ichat
+               * icu_ii
+               * ivisit
+               * ms_netmeet
+               * qnext
+               * windows_messenger
+               * yahoo_messenger
+          * Other
+               * convers
+               * sip
+               * sip_tls
+               * virtual_places
+     * Encryption
+
+         applications that transmit encrypted traffic across a network.
+
+          * ipsec
+          * isakmp
+          * kerberos
+          * ssh
+     * File_Systems
+
+         applications that implement network file systems.
+
+          * afs
+          * nfs
+     * File_Transfer
+
+         applications that facilitate the transfer of files from one computer
+         to another.
+
+          * FTP
+               * bbftp
+               * ftp_control
+               * ftp_data
+               * gsi_ftp
+          * bbcp
+          * rsync
+     * Games
+
+         applications that are used to serve or play networked games.
+
+          * asherons
+          * battlenet
+          * blackwhite
+          * direct_play
+          * doom
+          * aoe
+          * everquest
+          * gamespy_arcade
+          * halflife
+          * halo
+          * netrek
+          * quake
+          * starcraft
+          * starsiege
+          * swg
+          * unreal
+          * wow
+          * yahoo_games
+     * Login
+
+         applications that can be used to remotely access a computer (without
+         encryption).
+
+          * Text
+               * ncp
+               * rexec
+               * rlogin
+               * rshell
+               * telnet
+               * vnc
+               * windows_rdp
+          * GUI
+               * dameware
+               * firewall-1
+               * linuxconf
+               * netware
+               * pcanywhere
+               * radmin
+               * timbuktu
+               * vmware
+               * x11
+     * Mail/News
+
+         applications that can be used to transmit or ar access email and
+         newsgroups.
+
+          * Mail
+               * biff
+               * imap
+               * pop
+               * smtp
+               * smtps
+               * smtpsubmission
+          * News
+               * nntp
+     * Network_Infrastructure
+
+         applications that can query, support, or otherwise access network
+         hardware or otherwise facilitate the transfer of traffic from one
+         computer to another (including domain name resolution, time
+         synchronization, routing, and network measurement).
+
+          * ICMP
+               * icmp_echoreply
+               * icmp_unreach_net
+               * icmp_unreach_host
+               * icmp_unreach_protocol
+               * icmp_unreach_port
+               * icmp_unreach_needfrag
+               * icmp_unreach_srcfail
+               * icmp_unreach_net_unknown
+               * icmp_unreach_host_unknown
+               * icmp_unreach_isolated
+               * icmp_unreach_net_prohib
+               * icmp_unreach_host_prohib
+               * icmp_unreach_tosnet
+               * icmp_unreach_toshost
+               * icmp_unreach_filter_prohib
+               * icmp_unreach_host_precedence
+               * icmp_unreach_precedence_cutoff
+               * icmp_sourcequench
+               * icmp_redirect_net
+               * icmp_redirect_host
+               * icmp_redirect_tosnet
+               * icmp_redirect_toshost
+               * icmp_echo
+               * icmp_routeradvert
+               * icmp_routersolicit
+               * icmp_timxceed_intrans
+               * icmp_paramprob_erratptr
+               * icmp_paramprob_optabsent
+               * icmp_paramprob_length
+               * icmp_tstamp
+               * icmp_tstampreply
+               * icmp_ireq
+               * icmp_ireqreply
+               * icmp_maskreq
+               * icmp_maskreply
+          * Other
+               * big_brother
+               * bootp
+               * hdl_server
+               * iperf
+               * ntp
+               * osunms
+               * slp
+               * traceroute
+          * Routing
+               * bgp
+               * rip
+          * bonjour
+          * dns
+          * madcap
+          * multicast_dns
+          * networklens_event
+          * networklens_ssl_event
+          * snmp
+     * P2P
+
+         applications that are used for Peer-to-Peer file sharing.
+
+          * ares
+          * bittorrent
+          * blubster
+          * direct_connect
+          * edonkey
+          * fasttrack
+          * filebee
+          * fileguri
+          * filepia
+          * gnutella
+          * goboogy
+          * grouper
+          * hotline
+          * imesh
+          * Napster
+               * napster_control
+               * napster_data
+          * peerenabler
+          * romnet
+          * scour_ex
+          * share_direct
+          * soribada
+          * soulseek
+          * waste
+          * winmx
+     * Streaming
+
+         applications that are used for delivering live content (audio,
+         video, etc.) streams.
+
+          * abacast
+          * backbone_radio
+          * camarades
+          * itunes
+          * liquidaudio
+          * ms_media
+          * pointcast
+          * realplayer
+          * rtsp
+          * shoutcast
+     * Tunneling
+
+         applications that tunnel traffic from one place to another. Many
+         Virtual Private Networks (VPNs) fall into this category. In some
+         cases it may be possible to further dissect the tunneled packet to
+         uncover the original application, but with many tunneling
+         applications, transmitted data is encrypted or otherwise obscured.
+
+          * aol
+          * appletalk_ip
+          * netbios
+          * l2tp
+          * openvpn
+          * socks
+          * tinc
+     * WWW
+
+         applications that fetch, transmit, deliver, render, or cache World
+         Wide Web pages.
+
+          * gopher
+          * http
+          * https
+          * squid
+          * squid_icp
+     * Other
+
+         applications that are not described by any other application
+         category. As subgroups grow to contain a larger numbers of
+         applications with increased traffic prevalence, they may be promoted
+         to become new top-level categories.
+
+          * amanda
+          * at_backup
+          * carracho
+          * citrix_ica
+          * commplex-main
+          * distributed_net
+          * Database
+               * borland_interbase_db
+               * ms_sql_udp
+               * sql
+          * Directory
+               * ident
+               * ldap
+               * secure_ldap
+               * whois
+          * glimpse_server
+          * Host Support
+               * chargen
+               * daytime
+               * discard
+               * echo
+               * lpr
+               * sysstat
+               * timeserver
+               * who
+               * xlog
+          * ibp
+          * internet_printing_protocol
+          * iscsi
+          * isns
+          * lotus_notes
+          * Malicious Code
+               * backdoor.lala
+               * bagle_backdoor
+               * crat_pro_backdoor
+               * dabber_backdoor
+               * kuang2thevirus
+               * mydoom_backdoor
+               * netbustrojan
+               * optixpro_trojan
+               * port_1025_trojans_(4)
+               * port_5000_trojans_(7)
+               * portdoom
+               * remoconchubo
+               * remotestorm
+               * sasser_ftp
+               * sasser.e_backdoor
+               * slapper_worm
+               * sub7_trojan
+          * mcidas
+          * messenger_spam
+          * ndmp
+          * nhci_status
+          * noagent
+          * norton_av_host_discovery
+          * novell_groupwise
+          * Packet Radio
+               * aprs_http
+               * aprs_link
+               * aprs_msg
+               * aprs_server
+          * palm_hotsync
+          * pdl_datastream
+          * pptp
+          * razor
+          * remote_control
+          * rpc
+          * rtip
+          * samba_swat
+          * tekpls
+          * unidata_ldm
+
+     ----------------------------------------------------------------------
+
+   Author
+   CoralReef Development team, CAIDA: coral-info@caida.org
