@@ -1,0 +1,18 @@
+This tool quickly rewrites certain column values in ARFF files into other values, according to given
+configuration file.
+
+For instance, it can be used to convert the output labels of several traffic classifiers into a new,
+unified set of labels---so the results can be directly compared with each other.
+
+Format of the configuration file (dictionary):
+	source1 destination1
+	source2 destination2
+
+Two exemplary dictionaries are available:
+	dict-lpi2aggr   - converts results of libprotoident into aggregated classes
+	dict-coral2aggr - as above, but for the CAIDA CoralReef port classifier
+
+The dictionaries are not complete, i.e. they just represent a working subset of protocols, for the
+author of this tool.
+
+--Pawel Foremski <pjf@iitis.pl>, 2013
