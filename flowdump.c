@@ -24,7 +24,13 @@ static void cleanup()
 	lfc_deinit(fd->lfc);
 	thash_free(fd->out_files);
 	mmatic_destroy(fd->mm);
-	exit(0);
+}
+
+static void sigint()
+{
+	fprintf(stderr, "SIGINT cought - writing to disk and exiting...\n");
+	cleanup();
+	exit(3);
 }
 
 /** Prints usage help screen */
@@ -204,16 +210,20 @@ static void pkt(struct lfc *lfc, void *pdata,
 			uri = mmatic_sprintf(fd->mm, "pcap:%s/%s.pcap", fd->dir, name);
 
 			out = trace_create_output(uri);
-			if (!out)
+			if (!out) {
+				cleanup();
 				die("trace_create_output(%s) failed\n", uri);
+			}
 
 			if (trace_is_err_output(out)) {
 				trace_perror_output(out, "Opening output trace file");
+				cleanup();
 				die("trace_create_output(%s) failed\n", uri);
 			}
 
 			if (trace_start_output(out) == -1) {
 				trace_perror_output(out, "Starting output trace");
+				cleanup();
 				die("trace_start_output(%s) failed\n", uri);
 			}
 
@@ -229,6 +239,7 @@ static void pkt(struct lfc *lfc, void *pdata,
 	trace_write_packet(f->out, pkt);
 	if (trace_is_err_output(f->out)) {
 		trace_perror_output(f->out, "Writing packet to output trace file");
+		cleanup();
 		die("trace_write_packet() failed\n");
 	}
 }
@@ -249,7 +260,7 @@ int main(int argc, char *argv[])
 	fd->out_files = thash_create_strkey(trace_destroy_output, mm);
 
 	/* catch SIGINT */
-	signal(SIGINT, cleanup);
+	signal(SIGINT, sigint);
 
 	/* read options */
 	if (parse_argv(argc, argv))
@@ -261,19 +272,25 @@ int main(int argc, char *argv[])
 			fd->afh = stdin;
 		} else {
 			fd->afh = fopen(fd->arff_file, "r");
-			if (!fd->afh)
+			if (!fd->afh) {
+				cleanup();
 				die("Reading input ARFF file '%s' failed: %s\n", fd->arff_file, strerror(errno));
+			}
 		}
 
-		if (pjf_mkdir(fd->dir) != 0)
+		if (pjf_mkdir(fd->dir) != 0) {
+			cleanup();
 			die("Creating output directory '%s' failed\n", fd->dir);
+		}
 	}
 
 	fd->lfc = lfc_init();
 	lfc_register(fd->lfc, "flowdump", sizeof(struct flow), pkt, NULL, fd);
 
-	if (!lfc_run(fd->lfc, fd->pcap_file, fd->filter))
+	if (!lfc_run(fd->lfc, fd->pcap_file, fd->filter)) {
+		cleanup();
 		die("Reading file '%s' failed\n", fd->pcap_file);
+	}
 
 	cleanup();
 	return 0;

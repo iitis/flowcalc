@@ -25,7 +25,9 @@ FTP_Data	FTP
 FTP_Control	FTP
 TDS	SQL
 MySQL	SQL
-SQLExp	SQL
+SQLExp	Attack
+ZeroAccess_UDP	Attack
+VxWorks_Exploit	Attack
 Unknown_TCP	Unknown
 Unknown_UDP	Unknown
 SSL/TLS	Unknown

@@ -1,0 +1,2 @@
+This tool will read uncompressed PCAP on its input, chop all packet headers up to and not including
+the IPv4 header, and output uncompressed PCAP on its output.

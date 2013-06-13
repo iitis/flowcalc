@@ -1,8 +1,7 @@
 These tools can be used to obtain the ground-truth protocol classification for PCAP files.
 
-First, one runs toarff.sh, which accepts uncompressed PCAP on its standard input, and outputs
-uncompressed PCAP on its standard output---but with all packet headers chopped, up to (and not
-including) the IP header.
+First, one runs toarff.sh, which calls flowcalc to find the protocols using DPI, and compute some
+statistics, etc. on the flows.
 
 Second, one can run lpifix.sh, which will apply some hand-made heuristics to correct the
 classification results of libprotoident.
