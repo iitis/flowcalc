@@ -8,7 +8,13 @@ def readdb(path):
 
 	f = open(path)
 	for line in f:
-		l = line.strip().split()
+		line = line.strip()
+
+		if line[0] == "#":
+			continue
+		else:
+			l = line.split()
+
 		db[l[0]] = l[1]
 
 	return db

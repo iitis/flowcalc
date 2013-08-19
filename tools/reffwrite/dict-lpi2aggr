@@ -1,3 +1,4 @@
+# vim: ts=25
 BitTorrent_UDP	BitTorrent
 Invalid_Bittorrent	BitTorrent
 HTTP	WWW
@@ -25,14 +26,21 @@ FTP_Data	FTP
 FTP_Control	FTP
 TDS	SQL
 MySQL	SQL
-SQLExp	Attack
-ZeroAccess_UDP	Attack
-VxWorks_Exploit	Attack
+SQLExp	Unknown
+ZeroAccess_UDP	Unknown
+VxWorks_Exploit	Unknown
 Unknown_TCP	Unknown
 Unknown_UDP	Unknown
 SSL/TLS	Unknown
 HTTP_NonStandard	Unknown
 Web_Junk	Unknown
+Mystery_E9 	Unknown
+Mystery_QQ 	Unknown
+Mystery_05 	Unknown
+Mystery_0D 	Unknown
+Mystery_Symantec	Unknown
+Linkproof	Unknown
+ApplePush	Unknown
 EMule	eMule
 eMule_UDP	eMule
 TeamViewer_UDP	Teamviewer
@@ -45,3 +53,7 @@ SIP_UDP	SIP
 SOCKS4	SOCKS
 SOCKS5	SOCKS
 No_Payload	TCP_Empty
+Norton_UDP	Norton
+LanSync_UDP	LanSync
+Hamachi_UDP	Hamachi
+RFB	VNC

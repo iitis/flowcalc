@@ -1,3 +1,4 @@
+# vim: ts=25
 BITTORRENT	BitTorrent
 HTTP	WWW
 HTTPS	WWW
@@ -25,3 +26,8 @@ QUAKE	Steam
 SHOUTCAST	Shoutcast
 REALPLAYER	RealPlayer
 WINDOWS_MESSENGER	WindowsMessenger
+ABACAST 	Abacast
+FILEPIA 	Filepia
+BLUBSTER 	Blubster
+GNUTELLA 	Gnutella
+FASTTRACK 	Fasttrack
