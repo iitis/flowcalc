@@ -184,7 +184,9 @@ bool init(struct lfc *lfc, void **mydata, struct flowcalc *fc)
 	struct dnsdata *md;
 
 	printf("%%%% dns 0.1\n");
+	printf("%% dns_flow: is a DNS flow?\n");
 	printf("%% dns_name: DNS domain name\n");
+	printf("@attribute dns_flow numeric\n");
 	printf("@attribute dns_name string\n");
 
 	md = mmatic_zalloc(lfc->mm, sizeof *md);
@@ -251,6 +253,7 @@ void pkt(struct lfc *lfc, void *mydata,
 	qlen   = ntohs(*((uint16_t *) (buf+4)));
 	alen   = ntohs(*((uint16_t *) (buf + 6)));
 
+	/* FIXME? check if this is correct... */
 	if (!(qr == 1) && (opcode == 0) && (rcode == 0) && (qlen != 1) && (alen > 0))
 		return; /* nothing interesting/supported in this packet */
 
@@ -326,6 +329,11 @@ void flow(struct lfc *lfc, void *mydata,
 	struct lfc_flow *flow, void *flowdata)
 {
 	struct flowdata *fd = flowdata;
+
+	if (fd->is_dns)
+		printf(",1");
+	else
+		printf(",0");
 
 	if (fd->name[0])
 		printf(",%s", fd->name);
