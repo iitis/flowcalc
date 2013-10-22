@@ -245,16 +245,14 @@ void pkt(struct lfc *lfc, void *mydata,
 	 * parse the DNS header
 	 */
 	uint8_t opcode, qr, rcode;
-	uint16_t qlen, alen;
+	uint16_t alen;
 
 	qr     = buf[2] >> 7;
 	opcode = (buf[2] >> 3) & 0x0f;
 	rcode  = buf[3] & 0x0f;
-	qlen   = ntohs(*((uint16_t *) (buf+4)));
 	alen   = ntohs(*((uint16_t *) (buf + 6)));
 
-	/* FIXME? check if this is correct... */
-	if (!(qr == 1) && (opcode == 0) && (rcode == 0) && (qlen != 1) && (alen > 0))
+	if (!((qr == 1) && (opcode == 0) && (rcode == 0) && (alen > 0)))
 		return; /* nothing interesting/supported in this packet */
 
 	/*

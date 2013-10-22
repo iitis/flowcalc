@@ -27,6 +27,9 @@ struct flowcalc {
 	tlist *modules;       /**> list of char*: modules */
 	const char *dir;      /**> module directory */
 	bool any;             /**> enable LFM_CONFIG_TCP_ANYSTART? */
+
+	unsigned long n;      /**> packet limit */
+	double t;             /**> time limit */
 };
 
 struct module {

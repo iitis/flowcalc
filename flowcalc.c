@@ -12,6 +12,7 @@
 #include <dlfcn.h>
 #include <time.h>
 #include <getopt.h>
+#include <stdlib.h>
 
 #include <libpjf/main.h>
 #include <libflowcalc.h>
@@ -31,6 +32,8 @@ static void help(void)
 	printf("  -d <dir>               directory to look for modules in [%s]\n", MYDIR);
 	printf("  -e <modules>           comma-separated list of modules to enable\n");
 	printf("  -a                     start TCP flows with any packet\n");
+	printf("  -n <packets>           limit statistics to first n packets (e.g. 3)\n");
+	printf("  -t <time>              limit statistics to first <time> seconds (e.g. 1.5)\n");
 	printf("  --verbose,-V           be verbose (alias for --debug=5)\n");
 	printf("  --debug=<num>          set debugging level\n");
 	printf("  --help,-h              show this usage help screen\n");
@@ -57,7 +60,7 @@ static int parse_argv(struct flowcalc *fc, int argc, char *argv[])
 	int i, c;
 	char *d, *s;
 
-	static char *short_opts = "hvVf:r:d:e:a";
+	static char *short_opts = "hvVf:r:d:e:an:t:";
 	static struct option long_opts[] = {
 		/* name, has_arg, NULL, short_ch */
 		{ "verbose",    0, NULL,  1  },
@@ -96,6 +99,8 @@ static int parse_argv(struct flowcalc *fc, int argc, char *argv[])
 				tlist_push(fc->modules, s);
 				break;
 			case 'a': fc->any = true; break;
+			case 'n': fc->n = strtoul(optarg, NULL, 10); break;
+			case 't': fc->t = strtod(optarg, NULL); break;
 			default: help(); return 1;
 		}
 	}
@@ -212,7 +217,13 @@ int main(int argc, char *argv[])
 	lfc_register(fc->lfc, "flow_start", 0, NULL, flow_start, NULL);
 
 	if (fc->any)
-		lfc_enable(fc->lfc, LFC_OPT_TCP_ANYSTART);
+		lfc_enable(fc->lfc, LFC_OPT_TCP_ANYSTART, NULL);
+
+	if (fc->n > 0)
+		lfc_enable(fc->lfc, LFC_OPT_PACKET_LIMIT, &(fc->n));
+
+	if (fc->t > 0.0)
+		lfc_enable(fc->lfc, LFC_OPT_TIME_LIMIT, &(fc->t));
 
 	/*
 	 * load modules and draw ARFF header
