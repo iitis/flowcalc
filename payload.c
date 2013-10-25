@@ -87,6 +87,8 @@ static void print_buf(char *v, int s)
 	for (i = 0; i < s; i++) {
 		if (v[i] == '\'')
 			printf("\\'");
+		else if (v[i] == '\\')
+			printf("\\\\");
 		else if (isprint(v[i]))
 			putchar(v[i]);
 		else
