@@ -1,6 +1,4 @@
 /*
- * dns - find DNS name associated with a flow
- *
  * Author: Paweł Foremski
  * Copyright (c) 2013 IITiS PAN Gliwice <http://www.iitis.pl/>
  * Licensed under GNU GPL v. 3

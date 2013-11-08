@@ -29,7 +29,8 @@ struct dnsdata {
 };
 
 struct flowdata {
-	bool is_dns;                   /**> is it DNS flow? */
+	bool is_dns;                   /**> can it be a DNS flow? */
+	bool dns_found;                /**> DNS reply found? */
 	char name[64];                 /**> flow DNS name */
 };
 
@@ -219,7 +220,7 @@ void pkt(struct lfc *lfc, void *mydata,
 	}
 
 	/*
-	 * parse the IP/UDP packet 
+	 * parse the IP/UDP packet
 	 */
 	uint16_t ethertype;
 	uint32_t rem;
@@ -254,6 +255,9 @@ void pkt(struct lfc *lfc, void *mydata,
 
 	if (!((qr == 1) && (opcode == 0) && (rcode == 0) && (alen > 0)))
 		return; /* nothing interesting/supported in this packet */
+
+	/* assume being here is enough to assure it's a DNS reply packet */
+	fd->dns_found = true;
 
 	/*
 	 * parse the DNS query
