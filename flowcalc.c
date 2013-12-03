@@ -31,6 +31,7 @@ static void help(void)
 	printf("  -r <string>            set ARFF @relation to given string\n");
 	printf("  -d <dir>               directory to look for modules in [%s]\n", MYDIR);
 	printf("  -e <modules>           comma-separated list of modules to enable\n");
+	printf("  -l                     list available modules\n");
 	printf("  -a                     start TCP flows with any packet\n");
 	printf("  -n <packets>           limit statistics to first n packets (e.g. 3)\n");
 	printf("  -t <time>              limit statistics to first <time> seconds (e.g. 1.5)\n");
@@ -60,7 +61,7 @@ static int parse_argv(struct flowcalc *fc, int argc, char *argv[])
 	int i, c;
 	char *d, *s;
 
-	static char *short_opts = "hvVf:r:d:e:an:t:";
+	static char *short_opts = "hvVf:r:d:e:an:t:l";
 	static struct option long_opts[] = {
 		/* name, has_arg, NULL, short_ch */
 		{ "verbose",    0, NULL,  1  },
@@ -98,11 +99,17 @@ static int parse_argv(struct flowcalc *fc, int argc, char *argv[])
 				}
 				tlist_push(fc->modules, s);
 				break;
+			case 'l': fc->list = true; break;
 			case 'a': fc->any = true; break;
 			case 'n': fc->n = strtoul(optarg, NULL, 10); break;
 			case 't': fc->t = strtod(optarg, NULL); break;
 			default: help(); return 1;
 		}
+	}
+
+	if (fc->list) {
+		tlist_flush(fc->modules);
+		return 0;
 	}
 
 	if (argc - optind > 0) {
@@ -211,6 +218,14 @@ int main(int argc, char *argv[])
 				tlist_push(fc->modules, name);
 			}
 		}
+	}
+
+	if (fc->list) {
+		printf("flowcalc modules found in %s:\n", fc->dir);
+		tlist_iter_loop(fc->modules, name) {
+			printf("  %s\n", name);
+		}
+		return 0;
 	}
 
 	fc->lfc = lfc_init();

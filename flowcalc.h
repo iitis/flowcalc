@@ -25,6 +25,7 @@ struct flowcalc {
 	const char *filter;   /**> optional filter */
 	const char *relation; /**> ARFF @relation */
 	tlist *modules;       /**> list of char*: modules */
+	bool list;            /**> list modules and quit */
 	const char *dir;      /**> module directory */
 	bool any;             /**> enable LFM_CONFIG_TCP_ANYSTART? */
 
