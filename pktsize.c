@@ -17,7 +17,7 @@ struct flow {
 	struct pks down;
 };
 
-bool init()
+void header()
 {
 	printf("%%%% pktsize 0.1\n");
 
@@ -42,8 +42,6 @@ bool init()
 	printf("@attribute pks_3_down numeric\n");
 	printf("@attribute pks_4_down numeric\n");
 	printf("@attribute pks_5_down numeric\n");
-
-	return true;
 }
 
 void pkt(struct lfc *lfc, void *pdata,
@@ -86,7 +84,7 @@ void flow(struct lfc *lfc, void *pdata,
 
 struct module module = {
 	.size = sizeof(struct flow),
-	.init = init,
+	.header = header,
 	.pkt  = pkt,
 	.flow = flow
 };

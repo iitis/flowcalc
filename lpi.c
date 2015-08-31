@@ -3,13 +3,14 @@
 
 bool init()
 {
-	if (lpi_init_library())
-		return false;
+	return (lpi_init_library() == 0);
+}
 
+void header()
+{
 	printf("%%%% lpi 0.1 - libprotoident\n");
 	printf("@attribute lpi_category string\n");
 	printf("@attribute lpi_proto string\n");
-	return true;
 }
 
 void pkt(struct lfc *lfc, void *pdata,
@@ -36,6 +37,7 @@ void flow(struct lfc *lfc, void *pdata,
 struct module module = {
 	.size = sizeof(lpi_data_t),
 	.init = init,
+	.header = header,
 	.pkt = pkt,
 	.flow = flow
 };

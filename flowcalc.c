@@ -1,9 +1,22 @@
 /*
- * flowcalc
- * Copyright (c) 2012-2013 IITiS PAN Gliwice <http://www.iitis.pl/>
- * Author: Paweł Foremski
+ * flowcalc: convert PCAP traffic to WEKA files
+ * Copyright (C) 2012-2013 IITiS PAN Gliwice <http://www.iitis.pl/>
+ * Copyright (C) 2015 Akamai Technologies, Inc. <http://www.akamai.com/>
  *
- * Licensed under GNU GPL v. 3
+ * Author: Paweł Foremski <pjf@foremski.pl>
+ *
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
 #include <sys/socket.h>
@@ -29,10 +42,13 @@ static void help(void)
 	printf("Options:\n");
 	printf("  -f \"<filter>\"          apply given packet filter on the input file\n");
 	printf("  -r <string>            set ARFF @relation to given string\n");
+	printf("  -H                     skip ARFF header\n");
 	printf("  -d <dir>               directory to look for modules in [%s]\n", MYDIR);
 	printf("  -e <modules>           comma-separated list of modules to enable\n");
 	printf("  -l                     list available modules\n");
 	printf("  -a                     start TCP flows with any packet\n");
+	printf("  -b                     skip TCP flows with packet loss\n");
+	printf("  -c                     skip TCP flows that did not close properly\n");
 	printf("  -n <packets>           limit statistics to first n packets (e.g. 3)\n");
 	printf("  -t <time>              limit statistics to first <time> seconds (e.g. 1.5)\n");
 	printf("  --verbose,-V           be verbose (alias for --debug=5)\n");
@@ -45,11 +61,12 @@ static void help(void)
 static void version(void)
 {
 	printf("flowcalc %s\n", FLOWCALC_VER);
-	printf("Author: Paweł Foremski <pjf@iitis.pl>\n");
-	printf("Copyright (C) 2012-2013 IITiS PAN\n");
+	printf("Copyright (C) 2012-2013 IITiS PAN <http://www.iitis.pl/>\n");
+	printf("Copyright (C) 2015 Akamai Technologies, Inc. <http://www.akamai.com/>\n");
 	printf("Licensed under GNU GPL v3\n");
+	printf("Author: Paweł Foremski <pjf@foremski.pl>\n");
 	printf("Part of the MuTriCs project: <http://mutrics.iitis.pl/>\n");
-	printf("Realized under grant nr 2011/01/N/ST6/07202 of the Polish National Science Centre\n");
+	printf("Partly realized under grant nr 2011/01/N/ST6/07202 of the Polish National Science Centre\n");
 }
 
 /** Parses arguments and loads modules
@@ -61,7 +78,7 @@ static int parse_argv(struct flowcalc *fc, int argc, char *argv[])
 	int i, c;
 	char *d, *s;
 
-	static char *short_opts = "hvVf:r:d:e:an:t:l";
+	static char *short_opts = "hvVf:r:d:e:an:t:lHbc";
 	static struct option long_opts[] = {
 		/* name, has_arg, NULL, short_ch */
 		{ "verbose",    0, NULL,  1  },
@@ -103,6 +120,9 @@ static int parse_argv(struct flowcalc *fc, int argc, char *argv[])
 			case 'a': fc->any = true; break;
 			case 'n': fc->n = strtoul(optarg, NULL, 10); break;
 			case 't': fc->t = strtod(optarg, NULL); break;
+			case 'H': fc->nohead = true; break;
+			case 'b': fc->noloss = true; break;
+			case 'c': fc->reqclose = true; break;
 			default: help(); return 1;
 		}
 	}
@@ -166,8 +186,9 @@ static void header(struct flowcalc *fc)
 
 static void flow_start(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *data)
 {
-	printf("%u", lf->id);
+	char src[50], dst[50];
 
+	printf("%u", lf->id);
 	printf(",%.6f", lf->ts_first);
 	printf(",%.6f", lf->ts_last - lf->ts_first);
 
@@ -176,9 +197,15 @@ static void flow_start(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *
 	else
 		printf(",TCP");
 
-	printf(",%s,%d", inet_ntoa(lf->src.addr.ip4), lf->src.port);
-	printf(",%s,%d", inet_ntoa(lf->dst.addr.ip4), lf->dst.port);
+	if (lf->is_ip6) {
+		inet_ntop(AF_INET6, &(lf->src.addr.ip6), src, sizeof src);
+		inet_ntop(AF_INET6, &(lf->dst.addr.ip6), dst, sizeof dst);
+	} else {
+		inet_ntop(AF_INET, &(lf->src.addr.ip4), src, sizeof src);
+		inet_ntop(AF_INET, &(lf->dst.addr.ip4), dst, sizeof dst);
+	}
 
+	printf(",%s,%d,%s,%d", src, lf->src.port, dst, lf->dst.port);
 }
 
 static void flow_end(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *data)
@@ -231,19 +258,17 @@ int main(int argc, char *argv[])
 	fc->lfc = lfc_init();
 	lfc_register(fc->lfc, "flow_start", 0, NULL, flow_start, NULL);
 
-	if (fc->any)
-		lfc_enable(fc->lfc, LFC_OPT_TCP_ANYSTART, NULL);
-
-	if (fc->n > 0)
-		lfc_enable(fc->lfc, LFC_OPT_PACKET_LIMIT, &(fc->n));
-
-	if (fc->t > 0.0)
-		lfc_enable(fc->lfc, LFC_OPT_TIME_LIMIT, &(fc->t));
+	if (fc->any)      lfc_enable(fc->lfc, LFC_OPT_TCP_ANYSTART, NULL);
+	if (fc->n > 0)    lfc_enable(fc->lfc, LFC_OPT_PACKET_LIMIT, &(fc->n));
+	if (fc->t > 0.0)  lfc_enable(fc->lfc, LFC_OPT_TIME_LIMIT, &(fc->t));
+	if (fc->noloss)   lfc_enable(fc->lfc, LFC_OPT_TCP_NOLOSS, NULL);
+	if (fc->reqclose) lfc_enable(fc->lfc, LFC_OPT_TCP_REQCLOSE, NULL);
 
 	/*
 	 * load modules and draw ARFF header
 	 */
-	header(fc);
+	if (!fc->nohead)
+		header(fc);
 
 	tlist_iter_loop(fc->modules, name) {
 		if (streq(name, "none"))
@@ -257,12 +282,15 @@ int main(int argc, char *argv[])
 		if (!mod)
 			die("Opening module '%s' failed: no 'module' variable found inside\n", name);
 
+		pdata = NULL;
 		if (mod->init) {
-			pdata = NULL;
 			if (!mod->init(fc->lfc, &pdata, fc))
 				die("Opening module '%s' failed: the init() function returned false\n", name);
-			else
-				printf("\n");
+		}
+
+		if (!fc->nohead && mod->header) {
+			mod->header(fc->lfc, pdata, fc);
+			printf("\n");
 		}
 
 		lfc_register(fc->lfc, name, mod->size, mod->pkt, mod->flow, pdata);
@@ -273,7 +301,8 @@ int main(int argc, char *argv[])
 	/*
 	 * run it!
 	 */
-	printf("@data\n");
+	if (!fc->nohead)
+		printf("@data\n");
 
 	if (!lfc_run(fc->lfc, fc->file, fc->filter))
 		die("Reading file '%s' failed\n", fc->file);

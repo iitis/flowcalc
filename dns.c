@@ -180,15 +180,18 @@ void flow_assign_name(struct dnsdata *md, struct lfc_flow *flow, struct flowdata
 
 /**************************** main code */
 
-bool init(struct lfc *lfc, void **mydata, struct flowcalc *fc)
+void header()
 {
-	struct dnsdata *md;
-
 	printf("%%%% dns 0.1\n");
 	printf("%% dns_flow: is a DNS flow?\n");
 	printf("%% dns_name: DNS domain name\n");
 	printf("@attribute dns_flow numeric\n");
 	printf("@attribute dns_name string\n");
+}
+
+bool init(struct lfc *lfc, void **mydata, struct flowcalc *fc)
+{
+	struct dnsdata *md;
 
 	md = mmatic_zalloc(lfc->mm, sizeof *md);
 	md->mm = lfc->mm;
@@ -346,6 +349,7 @@ void flow(struct lfc *lfc, void *mydata,
 struct module module = {
 	.size = sizeof(struct flowdata),
 	.init = init,
+	.header = header,
 	.pkt  = pkt,
 	.flow = flow
 };

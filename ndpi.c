@@ -74,11 +74,13 @@ bool init(struct lfc *lfc, void **pdata)
 	ndpi_set_protocol_detection_bitmask2(ndpi->ndpi, &all);
 
 	*pdata = ndpi;
+	return true;
+}
 
+void header()
+{
 	printf("%%%% ndpi 0.1 - nDPI\n");
 	printf("@attribute ndpi_proto string\n");
-
-	return true;
 }
 
 void pkt(struct lfc *lfc, void *pdata,
@@ -118,6 +120,7 @@ void flow(struct lfc *lfc, void *pdata,
 struct module module = {
 	.size = sizeof(struct flow),
 	.init = init,
+	.header = header,
 	.pkt  = pkt,
 	.flow = flow
 };

@@ -18,15 +18,13 @@ struct flowdata {
 	int downs;                 /**> down size */
 };
 
-bool init(struct lfc *lfc, void **mydata, struct flowcalc *fc)
+void header()
 {
 	printf("%%%% payload 0.1\n");
 	printf("%% pl_up: payload bytes\n");
 	printf("%% pl_down: payload bytes\n");
 	printf("@attribute pl_up string\n");
 	printf("@attribute pl_down string\n");
-
-	return true;
 }
 
 void pkt(struct lfc *lfc, void *mydata,
@@ -106,7 +104,7 @@ void flow(struct lfc *lfc, void *mydata,
 
 struct module module = {
 	.size = sizeof(struct flowdata),
-	.init = init,
+	.header = header,
 	.pkt  = pkt,
 	.flow = flow
 };

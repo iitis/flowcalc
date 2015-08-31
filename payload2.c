@@ -18,7 +18,7 @@ struct flowdata {
 	int downs;                 /**> down size */
 };
 
-bool init(struct lfc *lfc, void **mydata, struct flowcalc *fc)
+void header()
 {
 	printf("%%%% payload2 0.1\n");
 	printf("%% pl_*_up: upload payload byte values\n");
@@ -30,8 +30,6 @@ bool init(struct lfc *lfc, void **mydata, struct flowcalc *fc)
 
 	for (i = 0; i < LEN; i++)
 		printf("@attribute pl_%d_down numeric\n", i+1);
-
-	return true;
 }
 
 void pkt(struct lfc *lfc, void *mydata,
@@ -102,7 +100,7 @@ void flow(struct lfc *lfc, void *mydata,
 
 struct module module = {
 	.size = sizeof(struct flowdata),
-	.init = init,
+	.header = header,
 	.pkt  = pkt,
 	.flow = flow
 };

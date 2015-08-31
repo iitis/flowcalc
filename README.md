@@ -1,18 +1,18 @@
 flowcalc
 ========
 
-A quick toolkit for calculating IP flow statistics out of raw traffic trace files. Thanks to the
-libtrace library, flowcalc can read numerous input file formats (see the [full
+A toolkit for calculating IP flow statistics in ARFF format out of raw PCAP traffic trace files.
+Thanks to the libtrace library, flowcalc can read numerous input file formats (see the [full
 list](http://research.wand.net.nz/software/libtrace.php)).
 
 flowcalc is based on [libflowcalc](https://github.com/iitis/libflowcalc). By default, it will load
 all `*.so` files found in the current directory and register its per-packet and per-flow callback
 functions using the `lfc_register()` function of libflowcalc.
 
-Such a `*.so` file is thus a module, which is responsible for calculating some set of flow
-statistics. Each module receives each packet as the trace file is read and can use the libtrace API
-to access the low-level packet data required for calculations. Once a given IP flow finishes,
-another function in the module is called so that it prints the flow data to the standard output.
+The `*.so` files are modules, which are responsible for calculating some set of flow statistics.
+Each module receives each packet as the trace file is read and can use the libtrace API to access
+the low-level packet data required for calculations. Once a given IP flow finishes, another function
+in the module is called so that it prints the flow data to the standard output.
 
 flowcalc uses the ARFF output file format readable e.g. by the WEKA and RapidMiner data-mining
 environments.

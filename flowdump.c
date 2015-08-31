@@ -55,9 +55,9 @@ static void help(void)
 static void version(void)
 {
 	printf("flowdump %s\n", FLOWDUMP_VER);
-	printf("Author: Paweł Foremski <pjf@iitis.pl>\n");
-	printf("Copyright (C) 2012-2013 IITiS PAN\n");
+	printf("Copyright (C) 2012-2013 IITiS PAN <http://www.iitis.pl/>\n");
 	printf("Licensed under GNU GPL v3\n");
+	printf("Author: Paweł Foremski <pjf@foremski.pl>\n");
 	printf("Part of the MuTriCs project: <http://mutrics.iitis.pl/>\n");
 	printf("Realized under grant nr 2011/01/N/ST6/07202 of the Polish National Science Centre\n");
 }

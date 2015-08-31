@@ -19,7 +19,7 @@ struct flow {
 	uint64_t bytes_down;
 };
 
-bool init()
+void header()
 {
 	printf("%%%% counters 0.1\n");
 	printf("%% cts_pkts_up:    number of packets in the initial direction\n");
@@ -31,8 +31,6 @@ bool init()
 	printf("@attribute cts_pkts_down numeric\n");
 	printf("@attribute cts_bytes_up numeric\n");
 	printf("@attribute cts_bytes_down numeric\n");
-
-	return true;
 }
 
 void pkt(struct lfc *lfc, void *pdata,
@@ -64,7 +62,7 @@ void flow(struct lfc *lfc, void *pdata,
 
 struct module module = {
 	.size = sizeof(struct flow),
-	.init = init,
+	.header = header,
 	.pkt  = pkt,
 	.flow = flow
 };

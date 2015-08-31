@@ -215,12 +215,6 @@ bool init(struct lfc *lfc, void **pdata, struct flowcalc *fc)
 	char sports[128] = {0}, dports[128] = {0};
 	char proto[128] = {0}, prio[128] = {0};
 
-	printf("%%%% coral 0.1\n");
-	printf("%% crl_group: protocol group\n");
-	printf("%% crl_name: protocol name\n");
-	printf("@attribute crl_group string\n");
-	printf("@attribute crl_name string\n");
-
 	/* read the CoralReef database */
 	coral = mmatic_zalloc(lfc->mm, sizeof *coral);
 	coral->ports = thash_create_intkey(NULL, lfc->mm);
@@ -297,6 +291,15 @@ bool init(struct lfc *lfc, void **pdata, struct flowcalc *fc)
 	return true;
 }
 
+void header()
+{
+	printf("%%%% coral 0.1\n");
+	printf("%% crl_group: protocol group\n");
+	printf("%% crl_name: protocol name\n");
+	printf("@attribute crl_group string\n");
+	printf("@attribute crl_name string\n");
+}
+
 void flow(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *data)
 {
 	struct coral *coral = pdata;
@@ -323,6 +326,7 @@ void flow(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *data)
 struct module module = {
 	.size = 0,
 	.init = init,
+	.header = header,
 	.pkt  = NULL,
 	.flow = flow
 };

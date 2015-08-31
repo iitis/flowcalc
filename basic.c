@@ -31,7 +31,7 @@ struct flow {
 
 /*****************************/
 
-bool init()
+void header()
 {
 	printf("%%%% basic_stats 0.1\n");
 	printf("%% bs_min_size_up: minimum payload size in forward direction\n");
@@ -67,8 +67,6 @@ bool init()
 	printf("@attribute bs_avg_iat_down numeric\n");
 	printf("@attribute bs_max_iat_down numeric\n");
 	printf("@attribute bs_std_iat_down numeric\n");
-
-	return true;
 }
 
 void pkt(struct lfc *lfc, void *pdata,
@@ -170,7 +168,7 @@ void flow(struct lfc *lfc, void *pdata,
 
 struct module module = {
 	.size = sizeof(struct flow),
-	.init = init,
+	.header = header,
 	.pkt  = pkt,
 	.flow = flow
 };

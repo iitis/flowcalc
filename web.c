@@ -68,7 +68,7 @@ struct flow {
 	struct dstats down;
 };
 
-bool init()
+void header()
 {
 	printf("%%%% web 0.1\n");
 	printf("%% web_up_size_50:     [up] request size probability:    <50 B\n");
@@ -175,8 +175,6 @@ bool init()
 	printf("@attribute web_down_resp_1000 numeric\n");
 	printf("@attribute web_down_resp_2500 numeric\n");
 	printf("@attribute web_down_resp_5000 numeric\n");
-
-	return true;
 }
 
 /** Check if packet holds TLS application data */
@@ -462,7 +460,7 @@ void flow(struct lfc *lfc, void *pdata,
 
 struct module module = {
 	.size = sizeof(struct flow),
-	.init = init,
+	.header = header,
 	.pkt  = pkt,
 	.flow = flow
 };
