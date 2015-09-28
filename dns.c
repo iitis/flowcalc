@@ -31,7 +31,7 @@ struct dnsdata {
 struct flowdata {
 	bool is_dns;                   /**> can it be a DNS flow? */
 	bool dns_found;                /**> DNS reply found? */
-	char name[64];                 /**> flow DNS name */
+	char name[128];                /**> flow DNS name */
 };
 
 /**************************** utility functions */
@@ -74,7 +74,7 @@ const char *parse_labels(uint8_t *buf, int rem, int *len)
 		if (ll == 0) {
 			*len += 1;
 			break;
-		} else if (ll == 0xc0) {
+		} else if ((ll & 0xc0) == 0xc0) {
 			*len += 2;
 			break;
 		}
@@ -172,6 +172,7 @@ void flow_assign_name(struct dnsdata *md, struct lfc_flow *flow, struct flowdata
 
 	if (name) {
 		strncpy(fd->name, name, sizeof(fd->name));
+		fd->name[sizeof(fd->name)-1] = 0;
 	} else {
 		dbg(3, "dns: no name for flow src=%s ", inet_ntoa(flow->src.addr.ip4));
 		dbg(3, "dst=%s\n", inet_ntoa(flow->dst.addr.ip4));
