@@ -44,27 +44,26 @@ void header()
 	printf("@attribute pks_5_down numeric\n");
 }
 
-void pkt(struct lfc *lfc, void *pdata,
-	struct lfc_flow *lf, void *data,
-	double ts, bool up, bool is_new, libtrace_packet_t *pkt)
+void pkt(struct lfc *lfc, void *plugin,
+	struct lfc_flow *lf, struct lfc_pkt *pkt, void *data)
 {
 	struct flow *f = data;
-	int len;
 
-	len = trace_get_payload_length(pkt);
-	if (len == 0)
-		return;
-
-	if (up) {
-		if (f->up.cnt == 5)
-			return;
-
-		f->up.size[f->up.cnt++] = len;
+	/* done? */
+	if (pkt->up) {
+		if (f->up.cnt == 5) return;
 	} else {
-		if (f->down.cnt == 5)
-			return;
+		if (f->down.cnt == 5) return;
+	}
 
-		f->down.size[f->down.cnt++] = len;
+	/* packet useful? */
+	if (pkt->dup || pkt->psize == 0) return;
+
+	/* record! */
+	if (pkt->up) {
+		f->up.size[f->up.cnt++] = pkt->psize;
+	} else {
+		f->down.size[f->down.cnt++] = pkt->psize;
 	}
 }
 

@@ -14,13 +14,10 @@ void header()
 }
 
 void pkt(struct lfc *lfc, void *pdata,
-	struct lfc_flow *lf, void *data,
-	double ts, bool up, bool is_new, libtrace_packet_t *pkt)
+	struct lfc_flow *lf, struct lfc_pkt *pkt, void *data)
 {
-	if (is_new)
-		lpi_init_data(data);
-
-	lpi_update_data(pkt, data, up);
+	if (pkt->first) lpi_init_data(data);
+	lpi_update_data(pkt->ltpkt, data, pkt->up);
 }
 
 void flow(struct lfc *lfc, void *pdata,

@@ -1,8 +1,8 @@
 /*
- * basic_stats - basic packet length and inter-arrival time statistics
+ * stats - basic packet length and inter-arrival time statistics
  *
  * Author: Paweł Foremski
- * Copyright (c) 2012 IITiS PAN Gliwice <http://www.iitis.pl/>
+ * Copyright (c) 2012-2015 IITiS PAN Gliwice <http://www.iitis.pl/>
  * Licensed under GNU GPL v. 3
  */
 
@@ -15,13 +15,13 @@ struct stats {
 	uint16_t pktlen_min;
 	uint16_t pktlen_max;
 	double pktlen_mean;
-	double pktlen_std;
+	double pktlen_var;
 
 	double last_ts;
-	uint32_t iat_min;
-	uint32_t iat_max;
+	double iat_min;
+	double iat_max;
 	double iat_mean;
-	double iat_std;
+	double iat_var;
 };
 
 struct flow {
@@ -33,7 +33,7 @@ struct flow {
 
 void header()
 {
-	printf("%%%% basic_stats 0.1\n");
+	printf("%%%% stats 0.1\n");
 	printf("%% bs_min_size_up: minimum payload size in forward direction\n");
 	printf("%% bs_avg_size_up: average payload size in forward direction\n");
 	printf("%% bs_max_size_up: maximum payload size in forward direction\n");
@@ -69,67 +69,53 @@ void header()
 	printf("@attribute bs_std_iat_down numeric\n");
 }
 
-void pkt(struct lfc *lfc, void *pdata,
-	struct lfc_flow *lf, void *data,
-	double ts, bool up, bool is_new, libtrace_packet_t *pkt)
+void pkt(struct lfc *lfc, void *plugin,
+	struct lfc_flow *lf, struct lfc_pkt *pkt, void *data)
 {
 	struct flow *flow = data;
 	struct stats *is;
-	int pktlen;
-	uint32_t iat;
-	double diff, mean, iatd;
+	double iat, n;
 
-	if (is_new) {
+	if (pkt->first) {
 		flow->up.pktlen_min = UINT16_MAX;
-		flow->up.iat_min = UINT32_MAX;
-
 		flow->down.pktlen_min = UINT16_MAX;
-		flow->down.iat_min = UINT32_MAX;
+		flow->up.iat_min = -1;
+		flow->down.iat_min = -1;
 	}
 
-	is = (up ? &flow->up : &flow->down);
+	if (pkt->dup) return;
+	if (pkt->psize == 0) return;
+
+	is = (pkt->up ? &flow->up : &flow->down);
 	is->pkts++;
+	n = is->pkts;
 
-	/* pkt length statistics */
-	pktlen = trace_get_wire_length(pkt);
-	if (pktlen < is->pktlen_min)
-		is->pktlen_min = pktlen;
-	if (pktlen > is->pktlen_max)
-		is->pktlen_max = pktlen;
+	/*
+	 * payload length statistics
+	 */
+	if (pkt->psize < is->pktlen_min) is->pktlen_min = pkt->psize;
+	if (pkt->psize > is->pktlen_max) is->pktlen_max = pkt->psize;
 
-	diff = pktlen - is->pktlen_mean;
-	mean = is->pktlen_mean + diff / is->pkts;
-	is->pktlen_std += diff * (pktlen - mean);
-	is->pktlen_mean = mean;
+	if (n > 1)
+		is->pktlen_var = (n-2)/(n-1)*is->pktlen_var + 1/n*pow(pkt->psize - is->pktlen_mean, 2.);
+	is->pktlen_mean = (pkt->psize + (n-1)*is->pktlen_mean) / n;
 
-	/* pkt inter-arrival time */
-	if (is->last_ts > 0) {
-		iatd = ts - is->last_ts;
-		if (iatd < 0) {
-			iat = 0;
-		} else {
-			/* convert to us */
-			iatd *= 1000000;
+	/*
+	 * payload packet inter-arrival time stats
+	 */
+	if (is->last_ts > 0 && pkt->ts > is->last_ts) {
+		iat = (pkt->ts - is->last_ts) * 1000.;
 
-			if (iatd > UINT32_MAX)
-				iat = UINT32_MAX;
-			else
-				iat = iatd;
-		}
+		if (is->iat_min < 0 || iat < is->iat_min) is->iat_min = iat;
+		if (iat > is->iat_max) is->iat_max = iat;
 
-		if (iat < is->iat_min)
-			is->iat_min = iat;
-		if (iat > is->iat_max)
-			is->iat_max = iat;
-
-		diff = iat - is->iat_mean;
-		mean = is->iat_mean + diff / is->pkts;
-		is->iat_std += diff * (iat - mean);
-		is->iat_mean = mean;
+		if (n > 1)
+			is->iat_var = (n-2)/(n-1)*is->iat_var + 1/n*pow(iat - is->iat_mean, 2.);
+		is->iat_mean = (iat + (n-1)*is->iat_mean) / n;
 	}
 
 	/* update timestamp of last pkt in this direction */
-	is->last_ts = ts;
+	is->last_ts = pkt->ts;
 }
 
 void flow(struct lfc *lfc, void *pdata,
@@ -146,8 +132,7 @@ void flow(struct lfc *lfc, void *pdata,
 			printf(",0,0,0,0");
 		} else {
 			printf(",%u,%.0f,%u,%.0f",
-				is->pktlen_min, is->pktlen_mean, is->pktlen_max,
-				sqrt(is->pktlen_std / is->pkts));
+				is->pktlen_min, is->pktlen_mean, is->pktlen_max, sqrt(is->pktlen_var));
 		}
 		is = &flow->down;
 	}
@@ -158,9 +143,8 @@ void flow(struct lfc *lfc, void *pdata,
 		if (is->pkts < 2) {
 			printf(",0,0,0,0");
 		} else {
-			printf(",%u,%.0f,%u,%.0f",
-				is->iat_min, is->iat_mean, is->iat_max,
-				sqrt(is->iat_std / is->pkts));
+			printf(",%.0f,%.0f,%.0f,%.0f",
+				is->iat_min, is->iat_mean, is->iat_max, sqrt(is->iat_var / is->pkts));
 		}
 		is = &flow->down;
 	}

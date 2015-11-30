@@ -202,17 +202,16 @@ bool init(struct lfc *lfc, void **mydata, struct flowcalc *fc)
 	return true;
 }
 
-void pkt(struct lfc *lfc, void *mydata,
-	struct lfc_flow *flow, void *flowdata,
-	double ts, bool up, bool is_new, libtrace_packet_t *pkt)
+void pkt(struct lfc *lfc, void *plugin,
+	struct lfc_flow *flow, struct lfc_pkt *pkt, void *data)
 {
-	struct dnsdata *md = mydata;
-	struct flowdata *fd = flowdata;
+	struct dnsdata *md = plugin;
+	struct flowdata *fd = data;
 
 	/*
 	 * is the flow a DNS one?
 	 */
-	if (is_new) {
+	if (pkt->first) {
 		fd->is_dns = is_dns(flow);
 
 		if (!fd->is_dns) {
@@ -224,34 +223,17 @@ void pkt(struct lfc *lfc, void *mydata,
 	}
 
 	/*
-	 * parse the IP/UDP packet
+	 * if it is a meaningful IPv4 DNS response packet,
+	 * then parse the DNS header
 	 */
-	uint16_t ethertype;
-	uint32_t rem;
-	libtrace_ip_t *ip;
-	libtrace_udp_t *udp;
+	if (!pkt->ip4  || !pkt->udp || pkt->sport != 53) return;
+	if (!pkt->data || pkt->len <= 34) return;
+
 	uint8_t *buf;
-	struct in_addr client_addr;
-
-	ip = trace_get_layer3(pkt, &ethertype, &rem);
-	if (!ip) return;
-
-	udp = trace_get_udp_from_ip(ip, &rem);
-	if (!udp) return;
-	if (ntohs(udp->source) != 53) return; /* it is not a DNS response */
-
-	buf = trace_get_payload_from_udp(udp, &rem);
-	if (!buf) return;
-	if (rem <= 34) return; /* it is too short to contain meaningful data */
-
-	client_addr = ip->ip_dst;
-
-	/*
-	 * parse the DNS header
-	 */
 	uint8_t opcode, qr, rcode;
 	uint16_t alen;
 
+	buf    = (uint8_t *) pkt->data;
 	qr     = buf[2] >> 7;
 	opcode = (buf[2] >> 3) & 0x0f;
 	rcode  = buf[3] & 0x0f;
@@ -271,10 +253,11 @@ void pkt(struct lfc *lfc, void *mydata,
 	const char *name;
 	uint16_t type, class;
 
-	buf += 12; left = rem - 12;
+	buf += 12; left = pkt->len - 12;
 	name = parse_labels(buf, left, &len);
 	if (!name) return;    /* truncated? */
-	else       strncpy(dns_name, name, sizeof(dns_name));
+	else       strncpy(dns_name, name, sizeof dns_name);
+
 	buf += len; left -= len;
 	if (left < 4) return; /* truncated? */
 
@@ -322,8 +305,8 @@ void pkt(struct lfc *lfc, void *mydata,
 		buf += rdlen; left -= rdlen;
 
 		/* add to the database! */
-		db_add(mydata, client_addr, server_addr, dns_name, ts);
-		dbg(3, "dns: %.6f client=%s ", ts, inet_ntoa(client_addr));
+		db_add(md, pkt->ip4->ip_dst, server_addr, dns_name, pkt->ts);
+		dbg(3, "dns: %.6f client=%s ", pkt->ts, inet_ntoa(pkt->ip4->ip_dst));
 		dbg(3, "server=%s dns_name=%s\n", inet_ntoa(server_addr), dns_name);
 	}
 
@@ -331,10 +314,9 @@ void pkt(struct lfc *lfc, void *mydata,
 
 }
 
-void flow(struct lfc *lfc, void *mydata,
-	struct lfc_flow *flow, void *flowdata)
+void flow(struct lfc *lfc, void *plugin, struct lfc_flow *flow, void *data)
 {
-	struct flowdata *fd = flowdata;
+	struct flowdata *fd = data;
 
 	if (fd->is_dns)
 		printf(",1");

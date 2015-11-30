@@ -1,6 +1,6 @@
 /*
  * flowdump
- * Copyright (c) 2012-2013 IITiS PAN Gliwice <http://www.iitis.pl/>
+ * Copyright (c) 2012-2015 IITiS PAN Gliwice <http://www.iitis.pl/>
  * Author: Paweł Foremski
  *
  * Licensed under GNU GPL v. 3
@@ -55,7 +55,7 @@ static void help(void)
 static void version(void)
 {
 	printf("flowdump %s\n", FLOWDUMP_VER);
-	printf("Copyright (C) 2012-2013 IITiS PAN <http://www.iitis.pl/>\n");
+	printf("Copyright (C) 2012-2015 IITiS PAN <http://www.iitis.pl/>\n");
 	printf("Licensed under GNU GPL v3\n");
 	printf("Author: Paweł Foremski <pjf@foremski.pl>\n");
 	printf("Part of the MuTriCs project: <http://mutrics.iitis.pl/>\n");
@@ -174,17 +174,15 @@ static void cache_update()
 /*******************************/
 
 static void pkt(struct lfc *lfc, void *pdata,
-	struct lfc_flow *lf, void *data,
-	double ts, bool up, bool is_new, libtrace_packet_t *pkt)
+	struct lfc_flow *lf, struct lfc_pkt *pkt, void *data)
 {
 	struct flow *f = data;
 	char *name, *uri;
 	libtrace_out_t *out;
 
-	if (f->ignore)
-		return;
+	if (f->ignore) return;
 
-	if (is_new) {
+	if (pkt->first) {
 		/* find the flow by its id in the ARFF file, get output file name */
 		name = thash_uint_get(fd->cache, lf->id);
 		if (!name) {
@@ -236,7 +234,7 @@ static void pkt(struct lfc *lfc, void *pdata,
 		thash_uint_set(fd->cache, lf->id, NULL);
 	}
 
-	trace_write_packet(f->out, pkt);
+	trace_write_packet(f->out, pkt->ltpkt);
 	if (trace_is_err_output(f->out)) {
 		trace_perror_output(f->out, "Writing packet to output trace file");
 		cleanup();

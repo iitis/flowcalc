@@ -1,6 +1,7 @@
 /*
  * websize: reports packet sizes for beginning of HTTPS connection
  * Copyright (C) 2015 Akamai Technologies, Inc. <http://www.akamai.com/>
+ * Copyright (c) 2015 IITiS PAN Gliwice <http://www.iitis.pl/>
  *
  * Author: Paweł Foremski <pjf@foremski.pl>
  *
@@ -51,55 +52,35 @@ void header()
 }
 
 /** Check if packet holds TLS application data (just first 2 bytes) */
-static bool is_tls_data(libtrace_packet_t *pkt)
+static bool is_tls_data(struct lfc_pkt *pkt)
 {
-	uint8_t proto;
-	uint16_t et;
-	uint32_t rem;
-	void *ptr;
-	uint8_t *v;
-
-	/* pass IP */
-	ptr = trace_get_layer3(pkt, &et, &rem);
-	if (!ptr)
-		return false;
-	else if (et == TRACE_ETHERTYPE_IP)
-		ptr = trace_get_payload_from_ip(ptr, &proto, &rem);
-	else if (et == TRACE_ETHERTYPE_IPV6)
-		ptr = trace_get_payload_from_ip6(ptr, &proto, &rem);
-	else
-		return false;
-
-	/* pass TCP */
-	if (!ptr)
-		return false;
-	else if (proto == TRACE_IPPROTO_TCP)
-		v = trace_get_payload_from_tcp(ptr, &rem);
-	else
-		return false;
+	/* packet is useful? */
+	if (!pkt->tcp) return false;
+	if (!pkt->data) return false;
+	if (pkt->len < 3) return false;
 
 	/* check TLS */
-	if (!v || rem < 3) return false;
+	uint8_t *v = pkt->data;
 	if (v[0] != 0x17)  return false; /* TLS Protocol Type must be Application */
 	if (v[1] != 3)     return false; /* TLS major version must be 3 */
 	if (v[2] > 3)      return false; /* TLS minor version must be <= 3 */
+
 	return true;
 }
 
 void pkt(struct lfc *lfc, void *pdata,
-	struct lfc_flow *lf, void *data,
-	double ts, bool up, bool is_new, libtrace_packet_t *pkt)
+	struct lfc_flow *lf, struct lfc_pkt *pkt, void *data)
 {
 	struct flow *f = data;
-	struct pks *s = up ? &(f->up) : &(f->down);
-	int len;
+	struct pks *s = pkt->up ? &(f->up) : &(f->down);
+
+	if (pkt->dup) return;
 
 	/* do we still need stats? */
 	if (s->cnt == N(s->size)) return;
 
 	/* skip no-payloads */
-	len = trace_get_payload_length(pkt);
-	if (len < 5) return;
+	if (pkt->psize < 5) return;
 
 	/* skip SSL setup */
 	if (!s->indata) {
@@ -110,10 +91,10 @@ void pkt(struct lfc *lfc, void *pdata,
 	}
 
 	/* ignore non-DATA frames (SPDY/H2) */
-	if (len < 80) return;
+	if (pkt->psize < 80) return;
 
 	/* count it */
-	s->size[s->cnt++] = len;
+	s->size[s->cnt++] = pkt->psize;
 }
 
 void flow(struct lfc *lfc, void *pdata,

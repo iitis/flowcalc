@@ -1,6 +1,6 @@
 /*
  * flowcalc: convert PCAP traffic to WEKA files
- * Copyright (C) 2012-2013 IITiS PAN Gliwice <http://www.iitis.pl/>
+ * Copyright (C) 2012-2015 IITiS PAN Gliwice <http://www.iitis.pl/>
  * Copyright (C) 2015 Akamai Technologies, Inc. <http://www.akamai.com/>
  *
  * Author: Paweł Foremski <pjf@foremski.pl>
@@ -184,7 +184,7 @@ static void header(struct flowcalc *fc)
 	printf("\n");
 }
 
-static void flow_start(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *data)
+static void flow_start(struct lfc *lfc, void *plugin, struct lfc_flow *lf, void *data)
 {
 	char src[50], dst[50];
 
@@ -198,17 +198,17 @@ static void flow_start(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *
 		printf(",TCP");
 
 	if (lf->is_ip6) {
-		inet_ntop(AF_INET6, &(lf->src.addr.ip6), src, sizeof src);
-		inet_ntop(AF_INET6, &(lf->dst.addr.ip6), dst, sizeof dst);
+		inet_ntop(AF_INET6, &lf->src.addr.ip6, src, sizeof src);
+		inet_ntop(AF_INET6, &lf->dst.addr.ip6, dst, sizeof dst);
 	} else {
-		inet_ntop(AF_INET, &(lf->src.addr.ip4), src, sizeof src);
-		inet_ntop(AF_INET, &(lf->dst.addr.ip4), dst, sizeof dst);
+		inet_ntop(AF_INET, &lf->src.addr.ip4, src, sizeof src);
+		inet_ntop(AF_INET, &lf->dst.addr.ip4, dst, sizeof dst);
 	}
 
 	printf(",%s,%d,%s,%d", src, lf->src.port, dst, lf->dst.port);
 }
 
-static void flow_end(struct lfc *lfc, void *pdata, struct lfc_flow *lf, void *data)
+static void flow_end(struct lfc *lfc, void *plugin, struct lfc_flow *lf, void *data)
 {
 	printf("\n");
 }

@@ -33,50 +33,27 @@ void header()
 }
 
 void pkt(struct lfc *lfc, void *mydata,
-	struct lfc_flow *flow, void *flowdata,
-	double ts, bool up, bool is_new, libtrace_packet_t *pkt)
+	struct lfc_flow *flow, struct lfc_pkt *pkt, void *data)
 {
-	struct flowdata *fd = flowdata;
+	struct flowdata *fd = data;
 
-	if (up) {
+	if (pkt->up) {
 		if (fd->ups > 0) return;
 	} else {
 		if (fd->downs > 0) return;
 	}
 
 	/*
-	 * get the payload
+	 * copy?
 	 */
-	uint8_t proto;
-	uint16_t ethertype;
-	uint32_t rem;
-	void *ptr;
-	uint8_t *v;
-
-	ptr = trace_get_layer3(pkt, &ethertype, &rem);
-	if (!ptr || ethertype != TRACE_ETHERTYPE_IP) return;
-
-	ptr = trace_get_payload_from_ip(ptr, &proto, &rem);
-	if (!ptr) return;
-
-	if (proto == TRACE_IPPROTO_TCP)
-		v = trace_get_payload_from_tcp(ptr, &rem);
-	else if (proto == TRACE_IPPROTO_UDP)
-		v = trace_get_payload_from_udp(ptr, &rem);
-	else
-		v = NULL;
-
-	if (!v || rem == 0) return;
-
-	/*
-	 * copy
-	 */
-	if (up) {
-		fd->ups = MIN(LEN, rem);
-		memcpy(fd->up, v, fd->ups);
+	if (!pkt->data || pkt->len == 0) {
+		return;
+	} else if (pkt->up) {
+		fd->ups = MIN(LEN, pkt->len);
+		memcpy(fd->up, pkt->data, fd->ups);
 	} else {
-		fd->downs = MIN(LEN, rem);
-		memcpy(fd->down, v, fd->downs);
+		fd->downs = MIN(LEN, pkt->len);
+		memcpy(fd->down, pkt->data, fd->downs);
 	}
 }
 

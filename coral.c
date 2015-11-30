@@ -113,7 +113,7 @@ struct port *port_match(struct coral *coral, uint16_t proto, unsigned long sport
 				break;
 		}
 
-		/* no port list = it maches */
+		/* no port list = it matches */
 		if (!port->portset)
 			return port;
 	

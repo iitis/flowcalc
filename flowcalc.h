@@ -1,6 +1,6 @@
 /*
  * flowcalc: convert PCAP traffic to WEKA files
- * Copyright (C) 2012-2013 IITiS PAN Gliwice <http://www.iitis.pl/>
+ * Copyright (C) 2012-2015 IITiS PAN Gliwice <http://www.iitis.pl/>
  * Copyright (C) 2015 Akamai Technologies, Inc. <http://www.akamai.com/>
  *
  * Author: Paweł Foremski <pjf@foremski.pl>
@@ -56,18 +56,18 @@ struct module {
 
 	/**> Optional initialization function
 	 * @param lfc      access to libflowcalc configuration, etc.
-	 * @param pdata    space for storing plugin data address (optional)
+	 * @param plugin   space for storing plugin data (optional)
 	 * @param fc       access to flowcalc configuration, etc.
 	 * @retval false   initialization failed
 	 */
-	bool (*init)(struct lfc *lfc, void **pdata, struct flowcalc *fc);
+	bool (*init)(struct lfc *lfc, void **plugin, struct flowcalc *fc);
 
 	/**> Print ARFF header
 	 * @param lfc      libflowcalc configuration, etc.
-	 * @param pdata    plugin data
+	 * @param plugin   plugin data
 	 * @param fc       flowcalc configuration, etc.
 	 */
-	void (*header)(struct lfc *lfc, void *pdata, struct flowcalc *fc);
+	void (*header)(struct lfc *lfc, void *plugin, struct flowcalc *fc);
 };
 
 #endif
